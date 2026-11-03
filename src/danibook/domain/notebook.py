@@ -252,7 +252,7 @@ class NotebookService:
                 "overview": "No hay fuentes seleccionadas. Sube o selecciona documentos para comenzar el análisis."
             }
 
-        desk_preview = self.desk.build_context_prefix(active_sources)
+        desk_preview = self.desk.build_desk_prefix(max_chars=6000)
         return self.engine.generate_notebook_overview(desk_preview)
 
     def stream_synthesis(

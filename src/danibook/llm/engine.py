@@ -6,7 +6,7 @@ import re
 import threading
 import urllib.request
 from ..config import DEFAULT_MODEL_ID, GEMMA_MODELS, MODELS_DIR, CACHE_DIR, ModelPreset
-from .prompts import NAMING_NOTE_PROMPT
+from .prompts import NAMING_NOTE_PROMPT, NAMING_NOTEBOOK_PROMPT, SOURCES_OVERVIEW_PROMPT
 
 
 class LLMEngine:
@@ -527,8 +527,8 @@ class LLMEngine:
             try:
                 ov_resp = self._llm.create_chat_completion(
                     messages=[
-                        {"role": "system", "content": "You are a concise research assistant."},
-                        {"role": "user", "content": f"Based on the following source excerpts, write a concise 2-3 sentence overview in Spanish explaining what these documents cover and what the user can research:\n\n{sources_summary[:3000]}"}
+                        {"role": "system", "content": "You are a concise research assistant. Follow ASD-STE100 principles."},
+                        {"role": "user", "content": f"{SOURCES_OVERVIEW_PROMPT}\n\nSources:\n{sources_summary[:3000]}"}
                     ],
                     max_tokens=180,
                     temperature=0.3,
@@ -543,8 +543,7 @@ class LLMEngine:
             try:
                 title_resp = self._llm.create_chat_completion(
                     messages=[
-                        {"role": "system", "content": "You are an editor."},
-                        {"role": "user", "content": f"Create an elegant 2 to 4 word notebook title in Spanish summarizing this content. No quotes, no trailing punctuation:\n\n{overview}"}
+                        {"role": "user", "content": NAMING_NOTEBOOK_PROMPT.format(text=overview)}
                     ],
                     max_tokens=24,
                     temperature=0.3,
