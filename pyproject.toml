@@ -1,0 +1,29 @@
+[project]
+name = "danibook"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Andrés Tobelem", email = "andres.tobelem@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "duckduckgo-search>=8.1.1",
+    "ebooklib>=0.21",
+    "gradio>=6.31.0",
+    "huggingface-hub>=2.4.0",
+    "llama-cpp-python>=0.3.36",
+    "playwright>=1.64.1",
+    "pypdf>=6.21.4",
+    "pytest>=9.2.0",
+    "pytest-playwright>=0.10.0",
+    "python-docx>=1.2.0",
+]
+
+[project.scripts]
+danibook = "danibook:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"

@@ -1,0 +1,2494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <script>
+    try {
+      document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem("color-scheme") ?? "light dark";
+    } catch (_) {}
+  </script>
+  <title>NotebookLM Local — Gemma 4 Multimodal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+  <script src="/vendor/marked.min.js"></script>
+  <script src="/vendor/purify.min.js"></script>
+  <script type="module" src="/vendor/material-web.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+
+      &:has(> head > meta[name="color-scheme"][content="dark"]) {
+        color-scheme: dark;
+      }
+      &:has(> head > meta[name="color-scheme"][content="light"]) {
+        color-scheme: light;
+      }
+
+      /* Google Material Design 3 Color Tokens (Light / Dark pairs) */
+      --md-surface-light: #f8fafd;
+      --md-surface-dark: #131314;
+
+      --md-panel-light: #ffffff;
+      --md-panel-dark: #1e1f20;
+
+      --md-card-light: #f0f4f9;
+      --md-card-dark: #282a2c;
+
+      --md-card-hover-light: #e3e9f2;
+      --md-card-hover-dark: #333537;
+
+      --md-primary-light: #0b57d0;
+      --md-primary-dark: #a8c7fa;
+
+      --md-on-primary-light: #ffffff;
+      --md-on-primary-dark: #062e6f;
+
+      --md-primary-container-light: #d3e3fd;
+      --md-primary-container-dark: #0842a0;
+
+      --md-on-primary-container-light: #041e49;
+      --md-on-primary-container-dark: #d3e3fd;
+
+      --md-text-primary-light: #1f1f1f;
+      --md-text-primary-dark: #e3e3e3;
+
+      --md-text-secondary-light: #444746;
+      --md-text-secondary-dark: #c4c7c5;
+
+      --md-text-muted-light: #747775;
+      --md-text-muted-dark: #8e918f;
+
+      --md-outline-light: #e0e3e7;
+      --md-outline-dark: #37393b;
+
+      --md-danger-light: #b3261e;
+      --md-danger-dark: #f28b82;
+
+      /* Fallback defaults before @supports light-dark */
+      --bg-app: var(--md-surface-light);
+      --bg-panel: var(--md-panel-light);
+      --bg-card: var(--md-card-light);
+      --bg-card-hover: var(--md-card-hover-light);
+      --accent: var(--md-primary-light);
+      --on-accent: var(--md-on-primary-light);
+      --pill-bg: var(--md-primary-container-light);
+      --pill-text: var(--md-on-primary-container-light);
+      --text-primary: var(--md-text-primary-light);
+      --text-secondary: var(--md-text-secondary-light);
+      --text-muted: var(--md-text-muted-light);
+      --border-subtle: var(--md-outline-light);
+      --danger: var(--md-danger-light);
+
+      @media (prefers-color-scheme: dark) {
+        --bg-app: var(--md-surface-dark);
+        --bg-panel: var(--md-panel-dark);
+        --bg-card: var(--md-card-dark);
+        --bg-card-hover: var(--md-card-hover-dark);
+        --accent: var(--md-primary-dark);
+        --on-accent: var(--md-on-primary-dark);
+        --pill-bg: var(--md-primary-container-dark);
+        --pill-text: var(--md-on-primary-container-dark);
+        --text-primary: var(--md-text-primary-dark);
+        --text-secondary: var(--md-text-secondary-dark);
+        --text-muted: var(--md-text-muted-dark);
+        --border-subtle: var(--md-outline-dark);
+        --danger: var(--md-danger-dark);
+      }
+
+      @supports (color: light-dark(white, black)) {
+        --bg-app: light-dark(var(--md-surface-light), var(--md-surface-dark));
+        --bg-panel: light-dark(var(--md-panel-light), var(--md-panel-dark));
+        --bg-card: light-dark(var(--md-card-light), var(--md-card-dark));
+        --bg-card-hover: light-dark(var(--md-card-hover-light), var(--md-card-hover-dark));
+        --accent: light-dark(var(--md-primary-light), var(--md-primary-dark));
+        --on-accent: light-dark(var(--md-on-primary-light), var(--md-on-primary-dark));
+        --pill-bg: light-dark(var(--md-primary-container-light), var(--md-primary-container-dark));
+        --pill-text: light-dark(var(--md-on-primary-container-light), var(--md-on-primary-container-dark));
+        --text-primary: light-dark(var(--md-text-primary-light), var(--md-text-primary-dark));
+        --text-secondary: light-dark(var(--md-text-secondary-light), var(--md-text-secondary-dark));
+        --text-muted: light-dark(var(--md-text-muted-light), var(--md-text-muted-dark));
+        --border-subtle: light-dark(var(--md-outline-light), var(--md-outline-dark));
+        --danger: light-dark(var(--md-danger-light), var(--md-danger-dark));
+      }
+
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 9999px;
+      --shadow-panel: light-dark(0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.35));
+
+      accent-color: var(--accent);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      user-select: none;
+      vertical-align: middle;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      block-size: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP APP BAR (Google Material 3 Header) */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      block-size: 60px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      inline-size: 36px;
+      block-size: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4285f4, #a8c7fa, #34a853);
+      display: grid;
+      place-content: center;
+      font-weight: 700;
+      color: #062e6f;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 6px rgba(66, 133, 244, 0.25);
+    }
+
+    .notebook-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 6px 10px;
+      border-radius: 10px;
+      min-inline-size: 320px;
+      font-family: inherit;
+    }
+
+    .notebook-title:hover,
+    .notebook-title:focus {
+      border-color: var(--border-subtle);
+      background: var(--bg-panel);
+      outline: none;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .model-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-panel);
+    }
+
+    .status-dot {
+      inline-size: 8px;
+      block-size: 8px;
+      border-radius: 50%;
+      background: #34a853;
+      flex-shrink: 0;
+    }
+
+    .status-dot.downloading {
+      background: #fbbc04;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.35; }
+      to { opacity: 1; }
+    }
+
+    .model-select {
+      background: transparent;
+      color: var(--text-primary);
+      border: none;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      padding-inline-end: 4px;
+    }
+
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-panel);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: var(--shadow-panel);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+
+    /* MAIN 3-COLUMN MATERIAL 3 WORKSPACE */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 360px;
+      gap: 14px;
+      padding: 0 16px 16px 16px;
+      flex: 1 1 0;
+      min-block-size: 0;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-panel);
+      display: flex;
+      flex-direction: column;
+      min-block-size: 0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-block-end: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 14px;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      border-color: transparent;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+
+    /* LEFT COLUMN: SOURCES */
+    .source-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .collections-bar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .collections-bar-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .collection-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .collection-item-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .collection-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .collection-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .collection-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .collection-files-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-block-start: 4px;
+    }
+
+    .collection-file-chip {
+      font-size: 0.7rem;
+      background: var(--bg-panel);
+      color: var(--text-muted);
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 6px;
+      border-block-end: 1px solid var(--border-subtle);
+      margin-block-end: 14px;
+    }
+
+    .modal-tab-btn {
+      background: transparent;
+      border: none;
+      border-block-end: 2px solid transparent;
+      padding: 8px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .modal-tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-tab-btn.active {
+      color: var(--accent);
+      border-block-end-color: var(--accent);
+    }
+
+    .samples-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sample-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .sample-item-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .sample-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sample-name {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1 1 0;
+    }
+
+    .sample-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .select-all-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-block-end: 1px solid var(--border-subtle);
+    }
+
+    .sources-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .source-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      min-inline-size: 0;
+    }
+
+    .source-item:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .source-item.active {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--pill-bg) 42%, var(--bg-card));
+    }
+
+    .source-icon {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .source-name {
+      flex: 1 1 0;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .source-type-tag {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: var(--bg-panel);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .source-check {
+      inline-size: 16px;
+      block-size: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .source-delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .source-item:hover .source-delete-btn,
+    .note-card:hover .source-delete-btn {
+      opacity: 1;
+    }
+
+    .source-delete-btn:hover {
+      color: var(--danger);
+      background: color-mix(in srgb, var(--danger) 15%, transparent);
+    }
+
+    /* CENTER COLUMN: CHAT */
+    .chat-stream {
+      flex: 1 1 0;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .overview-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .overview-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overview-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-block-start: 4px;
+    }
+
+    .suggestion-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .suggestion-chip:hover {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      border-color: var(--accent);
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-inline-size: 88%;
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      padding: 12px 18px;
+      border-radius: 20px 20px 4px 20px;
+      font-weight: 500;
+    }
+
+    .msg.assistant {
+      align-self: flex-start;
+      background: transparent;
+      color: var(--text-primary);
+      padding: 4px 0;
+      max-inline-size: 95%;
+    }
+
+    .msg-content {
+      font-size: 0.94rem;
+      line-height: 1.65;
+      color: var(--text-primary);
+    }
+
+    .msg-content h1, .msg-content h2, .msg-content h3, .msg-content h4 {
+      color: var(--text-primary);
+      font-weight: 700;
+      margin-block: 14px 6px;
+      line-height: 1.3;
+    }
+
+    .msg-content h1 { font-size: 1.25rem; }
+    .msg-content h2 { font-size: 1.12rem; border-block-end: 1px solid var(--border-subtle); padding-block-end: 4px; }
+    .msg-content h3 { font-size: 1.02rem; color: var(--accent); }
+
+    .msg-content p {
+      margin-block-end: 10px;
+    }
+
+    .msg-content ul, .msg-content ol {
+      margin-block: 6px 12px;
+      padding-inline-start: 22px;
+    }
+
+    .msg-content li {
+      margin-block-end: 5px;
+    }
+
+    .msg-content strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .msg-content blockquote {
+      border-inline-start: 3px solid var(--accent);
+      background: var(--bg-card);
+      padding: 8px 14px;
+      margin-block: 8px 12px;
+      border-radius: 0 10px 10px 0;
+      color: var(--text-secondary);
+    }
+
+    .msg-content code {
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.85em;
+      color: var(--accent);
+    }
+
+    .msg-content pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      margin-block: 10px;
+    }
+
+    .msg-content pre code {
+      background: transparent;
+      padding: 0;
+      color: var(--text-primary);
+    }
+
+    .msg-content table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      margin-block: 10px;
+      font-size: 0.86rem;
+    }
+
+    .msg-content th, .msg-content td {
+      border: 1px solid var(--border-subtle);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .msg-content th {
+      background: var(--bg-card);
+      color: var(--accent);
+    }
+
+    .citation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      padding: 1px 8px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-inline: 2px;
+      cursor: pointer;
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+
+    .citation-badge:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+
+    .msg-actions {
+      display: flex;
+      gap: 8px;
+      margin-block-start: 4px;
+    }
+
+    .btn-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 0.76rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn-mini:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Bottom Floating Chat Input Bar (NotebookLM style) */
+    .chat-composer-wrap {
+      padding: 12px 20px 16px;
+      border-block-start: 1px solid var(--border-subtle);
+      background: var(--bg-panel);
+    }
+
+    .chat-composer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 28px;
+      padding: 8px 10px 8px 16px;
+      transition: border-color 0.15s ease;
+    }
+
+    .chat-composer:focus-within {
+      border-color: var(--accent);
+    }
+
+    .source-counter-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--pill-text);
+      background: var(--pill-bg);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+    }
+
+    .chat-input {
+      flex: 1 1 0;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      min-inline-size: 0;
+    }
+
+    .send-circle-btn {
+      inline-size: 36px;
+      block-size: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: var(--on-accent);
+      font-weight: bold;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      flex-shrink: 0;
+    }
+
+    .send-circle-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .msg-content img {
+      max-inline-size: 100%;
+      max-block-size: 320px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      margin-block: 8px;
+      object-fit: contain;
+      background: var(--bg-card);
+      cursor: zoom-in;
+      transition: transform 0.2s ease;
+    }
+
+    .msg-content img:hover {
+      transform: scale(1.02);
+    }
+
+    .msg-attached-img {
+      max-inline-size: 240px;
+      max-block-size: 180px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      margin-block-end: 6px;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+      transition: opacity 0.2s ease;
+    }
+
+    .msg-attached-img:hover {
+      opacity: 0.92;
+    }
+
+    .chat-attach-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      padding: 6px;
+      border-radius: 50%;
+      transition: color 0.15s ease, background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .chat-attach-btn:hover {
+      color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .chat-img-preview-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      margin-block-end: 6px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .chat-img-preview-thumb {
+      inline-size: 36px;
+      block-size: 36px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* RIGHT COLUMN: STUDIO */
+    .studio-section-title {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-block: 4px;
+    }
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .studio-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .studio-tile:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+
+    .tile-icon {
+      color: var(--accent);
+    }
+
+    .tile-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .tile-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .notes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-block-start: 6px;
+    }
+
+    .note-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .note-card:hover {
+      border-color: var(--accent);
+    }
+
+    .note-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .note-card-body {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      line-clamp: 3;
+      overflow: clip;
+      line-height: 1.45;
+    }
+
+    /* Native Dialogs with Light-Dismiss */
+    dialog.nb-modal {
+      margin: auto;
+      background: var(--bg-panel);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      inline-size: min(680px, 92dvw);
+      max-block-size: 85dvh;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    dialog.nb-modal::backdrop {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-block-end: 16px;
+      padding-block-end: 12px;
+      border-block-end: 1px solid var(--border-subtle);
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      max-block-size: 65dvh;
+      line-height: 1.65;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+      color: var(--text-secondary);
+    }
+
+    .note-editor-area {
+      inline-size: 100%;
+      min-block-size: 200px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      margin-block: 10px;
+    }
+
+    .note-title-field {
+      inline-size: 100%;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-family: inherit;
+    }
+
+    .add-source-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-block: 12px;
+    }
+
+    .add-source-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-source-card h4 {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .add-source-card p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Segmented 3-Way Theme Switcher (System / Light / Dark) */
+    .theme-segmented-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      gap: 2px;
+      box-shadow: var(--shadow-panel);
+    }
+
+    .theme-seg-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-seg-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+
+    .theme-seg-btn.active {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+    }
+
+    /* Animated Thinking State */
+    .thinking-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .thinking-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--text-secondary) 0%, var(--accent) 50%, var(--text-secondary) 100%);
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: shimmerText 2s linear infinite;
+    }
+
+    @keyframes shimmerText {
+      to { background-position: 200% center; }
+    }
+
+    .thinking-dots {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .thinking-dots span {
+      inline-size: 6px;
+      block-size: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: bounceDot 1.2s infinite ease-in-out both;
+    }
+
+    .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounceDot {
+      0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Model Progress Bar Banner */
+    .model-progress-banner {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0 16px 10px;
+      padding: 10px 16px;
+      background: var(--bg-panel);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-panel);
+    }
+
+    .model-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    md-linear-progress {
+      --md-linear-progress-active-indicator-color: var(--accent);
+      --md-linear-progress-track-color: var(--bg-card);
+      inline-size: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Bar (Material Design 3) -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <input type="text" class="notebook-title" value="Cuaderno de Investigación Local" aria-label="Notebook Title" />
+    </div>
+    <div class="header-meta">
+      <!-- Dynamic Hugging Face Gemma Model Selector + Disk Management -->
+      <div class="model-selector-wrap" title="Seleccionar modelo Gemma (se descarga el anterior de GPU y baja de Hugging Face si no está en disco)">
+        <span id="model-status-dot" class="status-dot"></span>
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">memory</span>
+        <select id="model-select" class="model-select" aria-label="Seleccionar Modelo Gemma"></select>
+        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Gestionar y borrar modelos del disco">
+          <span class="material-symbols-outlined" style="font-size:16px;">hard_drive</span>
+        </button>
+      </div>
+
+      <!-- Material 3 Segmented Theme Switcher: System (Default) / Light / Dark -->
+      <div class="theme-segmented-group" role="group" aria-label="Selector de tema">
+        <button type="button" class="theme-seg-btn active" data-theme-choice="system" title="Modo Sistema (Por defecto)">
+          <span class="material-symbols-outlined" style="font-size:16px;">routine</span>
+          <span>System</span>
+        </button>
+        <button type="button" class="theme-seg-btn" data-theme-choice="light" title="Modo Claro">
+          <span class="material-symbols-outlined" style="font-size:16px;">light_mode</span>
+          <span>Light</span>
+        </button>
+        <button type="button" class="theme-seg-btn" data-theme-choice="dark" title="Modo Oscuro">
+          <span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span>
+          <span>Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Official Google @material/web Progress Banner for Model Download & GPU Loading -->
+  <div id="model-progress-banner" class="model-progress-banner">
+    <div class="model-progress-header">
+      <span id="model-progress-text">Preparando modelo...</span>
+      <span id="model-progress-pct">0%</span>
+    </div>
+    <md-linear-progress id="model-linear-progress" value="0" max="1"></md-linear-progress>
+  </div>
+
+  <!-- Main 3-Column NotebookLM Workspace -->
+  <main class="workspace-grid">
+
+    <!-- LEFT PANEL: SOURCES -->
+    <section class="panel" aria-label="Fuentes">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="material-symbols-outlined" style="color:var(--accent);">folder_open</span>
+          <span>Fuentes</span>
+        </div>
+        <span id="sources-total-badge" style="font-size: 0.78rem; color: var(--text-muted);">0 archivos</span>
+      </div>
+      <div class="panel-body">
+        <div class="source-actions">
+          <button type="button" class="btn btn-primary" id="btn-open-add-source">
+            <span class="material-symbols-outlined">add</span>
+            <span>Agregar fuente</span>
+          </button>
+          <button type="button" class="btn" id="btn-open-research">
+            <span class="material-symbols-outlined">travel_explore</span>
+            <span>Deep Research</span>
+          </button>
+        </div>
+
+        <button type="button" class="collections-bar-btn" id="btn-open-collections" title="Cargar colecciones temáticas precargadas">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">library_books</span>
+            <span>Colecciones listas</span>
+          </div>
+          <span id="collections-count-badge" style="font-size:0.74rem; color:var(--text-muted);">4 temas</span>
+        </button>
+
+        <input
+          type="file"
+          id="file-upload-input"
+          multiple
+          accept=".pdf,.docx,.epub,.md,.markdown,.txt,.csv,.tsv,.json,.html,.png,.jpg,.jpeg,.webp,.gif,.mp3,.wav,.m4a,.ogg"
+          style="display:none"
+        />
+
+        <div class="select-all-bar">
+          <span>Seleccionar todas las fuentes</span>
+          <input type="checkbox" id="toggle-all-sources" checked class="source-check" title="Seleccionar todas" />
+        </div>
+
+        <div id="sources-list" class="sources-list">
+          <!-- Dynamically populated sources -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: CHAT -->
+    <section class="panel" aria-label="Chat">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="material-symbols-outlined" style="color:var(--accent);">forum</span>
+          <span>Chat Multimodal</span>
+        </div>
+        <button type="button" class="btn-mini" id="btn-clear-chat">
+          <span class="material-symbols-outlined" style="font-size:16px;">restart_alt</span>
+          <span>Limpiar charla</span>
+        </button>
+      </div>
+
+      <div id="chat-stream" class="chat-stream">
+        <div class="overview-banner">
+          <div class="overview-title">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <span>Guía del Cuaderno</span>
+          </div>
+          <div class="overview-desc">
+            Tus fuentes locales (libros, PDFs, EPUBs de Cervantes, tablas CSV, imágenes, audios y páginas web) están listas. Marca a la izquierda qué archivos e imágenes incluir en el contexto activo o usa una acción rápida.
+          </div>
+          <div class="chip-row">
+            <button type="button" class="suggestion-chip" data-action="summary">
+              <span class="material-symbols-outlined" style="font-size:16px;">summarize</span>
+              <span>Resumir fuentes activas</span>
+            </button>
+            <button type="button" class="suggestion-chip" data-action="contradictions">
+              <span class="material-symbols-outlined" style="font-size:16px;">fact_check</span>
+              <span>Buscar contradicciones</span>
+            </button>
+            <button type="button" class="suggestion-chip" data-action="timeline">
+              <span class="material-symbols-outlined" style="font-size:16px;">timeline</span>
+              <span>Armar línea de tiempo</span>
+            </button>
+            <button type="button" class="suggestion-chip" data-action="quotes">
+              <span class="material-symbols-outlined" style="font-size:16px;">format_quote</span>
+              <span>Extraer citas clave</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-composer-wrap">
+        <div id="chat-img-preview-bar" class="chat-img-preview-bar">
+          <img id="chat-img-preview-thumb" class="chat-img-preview-thumb" src="" alt="Adjunto" />
+          <span id="chat-img-preview-name" style="font-size:0.78rem; color:var(--text-primary); font-weight:600; flex:1 1 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+          <button type="button" class="btn-mini" id="chat-img-remove-btn" style="padding:2px 8px; font-size:0.7rem;">✕ Quitar</button>
+        </div>
+        <form id="chat-form" class="chat-composer">
+          <button type="button" class="chat-attach-btn" id="chat-attach-img-btn" title="Adjuntar imagen para que el modelo la vea">
+            <span class="material-symbols-outlined">add_photo_alternate</span>
+          </button>
+          <input type="file" id="chat-img-file-input" accept="image/*" style="display:none;" />
+          <span id="active-sources-pill" class="source-counter-pill">0 fuentes</span>
+          <input
+            type="text"
+            id="chat-input"
+            class="chat-input"
+            placeholder="Pregunta sobre tus documentos o imágenes activas..."
+            autocomplete="off"
+          />
+          <button type="submit" id="chat-send-btn" class="send-circle-btn" title="Enviar">
+            <span class="material-symbols-outlined">arrow_upward</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: STUDIO -->
+    <section class="panel" aria-label="Studio">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="material-symbols-outlined" style="color:var(--accent);">dashboard_customize</span>
+          <span>Studio & Notas</span>
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-new-note" style="padding: 6px 12px; font-size: 0.78rem;">
+          <span class="material-symbols-outlined" style="font-size:16px;">note_add</span>
+          <span>Nota</span>
+        </button>
+      </div>
+
+      <div class="panel-body">
+        <div class="studio-section-title">Generar Artefacto</div>
+        <div class="studio-grid">
+          <button type="button" class="studio-tile" data-studio="summary">
+            <span class="material-symbols-outlined tile-icon">menu_book</span>
+            <span class="tile-label">Guía de Estudio</span>
+            <span class="tile-sub">Síntesis temática</span>
+          </button>
+          <button type="button" class="studio-tile" data-studio="contradictions">
+            <span class="material-symbols-outlined tile-icon">balance</span>
+            <span class="tile-label">Auditoría</span>
+            <span class="tile-sub">Detectar huecos</span>
+          </button>
+          <button type="button" class="studio-tile" data-studio="timeline">
+            <span class="material-symbols-outlined tile-icon">schedule</span>
+            <span class="tile-label">Cronología</span>
+            <span class="tile-sub">Hitos y eventos</span>
+          </button>
+          <button type="button" class="studio-tile" data-studio="quotes">
+            <span class="material-symbols-outlined tile-icon">format_quote</span>
+            <span class="tile-label">Citas Textuales</span>
+            <span class="tile-sub">Fragmentos exactos</span>
+          </button>
+        </div>
+
+        <div class="studio-section-title" style="margin-block-start: 10px;">Notas Guardadas</div>
+        <div id="notes-list" class="notes-grid">
+          <!-- Dynamically populated notes -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Source Modal (All NotebookLM Supported Formats) -->
+  <dialog id="add-source-modal" class="nb-modal" closedby="any" aria-labelledby="add-source-modal-title">
+    <div class="modal-header">
+      <h3 id="add-source-modal-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined" style="color:var(--accent);">upload_file</span>
+        <span>Agregar Fuentes al Cuaderno (Multimodal)</span>
+      </h3>
+      <button type="button" class="btn-mini" id="close-add-source-modal">✕ Cerrar</button>
+    </div>
+
+    <div class="add-source-grid">
+      <!-- 1. Local Files (PDF, DOCX, EPUB, CSV, Images, Audio) -->
+      <div class="add-source-card">
+        <h4><span class="material-symbols-outlined" style="color:var(--accent);">attach_file</span> Archivos y Multimedia</h4>
+        <p>Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.</p>
+        <button type="button" class="btn btn-primary" id="trigger-file-picker-btn" style="margin-block-start:auto;">
+          <span class="material-symbols-outlined">folder</span> Elegir archivos del disco
+        </button>
+      </div>
+
+      <!-- 2. Web URL / YouTube Link -->
+      <div class="add-source-card">
+        <h4><span class="material-symbols-outlined" style="color:var(--accent);">link</span> Sitio Web o YouTube</h4>
+        <p>Pega el enlace de cualquier artículo web o un video de YouTube para importar su contenido y transcripción.</p>
+        <div style="display:flex; gap:6px; margin-block-start:auto;">
+          <input type="url" id="source-url-input" class="note-title-field" placeholder="https://..." style="padding:7px 10px; font-size:0.82rem;" />
+          <button type="button" class="btn btn-primary" id="import-url-source-btn">Importar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Paste Copied Text -->
+    <div class="add-source-card" style="margin-block-start:4px;">
+      <h4><span class="material-symbols-outlined" style="color:var(--accent);">content_paste</span> Pegar Texto Directo</h4>
+      <input type="text" id="paste-source-title" class="note-title-field" placeholder="Título de la fuente (ej: Apuntes_Reunion)" style="margin-block-top:4px;" />
+      <textarea id="paste-source-content" class="note-editor-area" style="min-block-size:110px;" placeholder="Pega aquí texto copiado para incorporarlo como fuente..."></textarea>
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-primary" id="save-paste-source-btn">Guardar como fuente</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Collections & Samples Modal -->
+  <dialog id="collections-modal" class="nb-modal" closedby="any" aria-labelledby="collections-modal-title">
+    <div class="modal-header">
+      <h3 id="collections-modal-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined" style="color:var(--accent);">library_books</span>
+        <span>Colecciones y Samples Listos</span>
+      </h3>
+      <button type="button" class="btn-mini" id="close-collections-modal">✕ Cerrar</button>
+    </div>
+
+    <!-- Tabs: Colecciones temáticas vs Archivos de muestra individuales -->
+    <div class="modal-tabs">
+      <button type="button" class="modal-tab-btn active" id="tab-btn-collections">
+        <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span>
+        <span>Colecciones Temáticas</span>
+      </button>
+      <button type="button" class="modal-tab-btn" id="tab-btn-samples">
+        <span class="material-symbols-outlined" style="font-size:18px;">folder_special</span>
+        <span>Archivos Samples Individuales</span>
+      </button>
+    </div>
+
+    <!-- Tab 1: Colecciones -->
+    <div id="tab-pane-collections">
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:14px;">
+        Carga packs temáticos con obras maestras, apuntes de IA o ensayos de psicoanálisis con un clic.
+      </p>
+      <div id="collections-list" style="display:flex; flex-direction:column; gap:10px; max-block-size:55dvh; overflow-y:auto;">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Tab 2: Samples Individuales -->
+    <div id="tab-pane-samples" style="display:none;">
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:14px;">
+        Selecciona obras y documentos de prueba específicos de <code>data/samples/</code> para sumarlos a tu mesa de trabajo.
+      </p>
+      <div id="samples-list" class="samples-grid" style="max-block-size:55dvh; overflow-y:auto;">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Source Inspector Modal -->
+  <dialog id="source-modal" class="nb-modal" closedby="any" aria-labelledby="source-modal-title">
+    <div class="modal-header">
+      <h3 id="source-modal-title">Vista de Fuente</h3>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="button" class="btn-mini" id="delete-source-modal-btn" style="color:var(--danger);">
+          <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+          <span>Quitar fuente</span>
+        </button>
+        <button type="button" class="btn-mini" id="close-source-modal">✕ Cerrar</button>
+      </div>
+    </div>
+    <div id="source-modal-body" class="modal-body"></div>
+  </dialog>
+
+  <!-- Note Editor Modal -->
+  <dialog id="note-modal" class="nb-modal" closedby="any" aria-labelledby="note-modal-title">
+    <div class="modal-header">
+      <h3 id="note-modal-title">📝 Editor de Nota</h3>
+      <button type="button" class="btn-mini" id="close-note-modal">✕ Cerrar</button>
+    </div>
+    <div>
+      <input type="text" id="note-title-input" class="note-title-field" placeholder="Título de la nota" />
+      <textarea id="note-content-input" class="note-editor-area" placeholder="Escribe o pega fragmentos..."></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-primary" id="save-note-confirm">💾 Guardar Nota en Disco</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Deep Research Modal -->
+  <dialog id="research-modal" class="nb-modal" closedby="any" aria-labelledby="research-modal-title">
+    <div class="modal-header">
+      <h3 id="research-modal-title">🌐 Deep Research — Investigador Web Autónomo</h3>
+      <button type="button" class="btn-mini" id="close-research-modal">✕ Cerrar</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <p style="font-size:0.86rem; color:var(--text-secondary);">
+        Busca información en la web y agrégala directamente como una fuente citada en tu cuaderno.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="research-topic-input" class="note-title-field" placeholder="Ej: 'Siglo de Oro Español Cervantes'..." />
+        <button type="button" class="btn btn-primary" id="run-research-btn">🔎 Investigar</button>
+      </div>
+      <div id="research-output-preview" class="modal-body" style="background:var(--bg-card); padding:12px; border-radius:10px; min-block-size:150px;">
+        Los hallazgos aparecerán aquí...
+      </div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-primary" id="import-research-btn" disabled>📥 Importar a mis Fuentes</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Models Disk & Memory Manager Modal -->
+  <dialog id="models-manager-modal" class="nb-modal" closedby="any" aria-labelledby="models-manager-title">
+    <div class="modal-header">
+      <h3 id="models-manager-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined" style="color:var(--accent);">hard_drive</span>
+        <span>Gestión de Modelos en Disco y Memoria GPU</span>
+      </h3>
+      <button type="button" class="btn-mini" id="close-models-manager-modal">✕ Cerrar</button>
+    </div>
+    <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:12px;">
+      Al cargar un modelo, el anterior se descarga automáticamente de la memoria GPU Metal. Desde aquí también puedes <b>borrar los archivos .gguf del disco</b> para liberar gigabytes o volver a descargarlos con barra de progreso.
+    </p>
+    <div id="models-manager-list" style="display:flex; flex-direction:column; gap:10px; max-block-size:55dvh; overflow-y:auto;"></div>
+  </dialog>
+
+  <script>
+    const state = {
+      sources: [],
+      selectedSources: new Set(),
+      notes: [],
+      models: [],
+      collections: [],
+      samples: [],
+      activeModelId: "",
+      chatHistory: [],
+      currentAttachedImageUri: null,
+      currentInspectedSource: null,
+      lastResearchTopic: "",
+      lastResearchMarkdown: ""
+    };
+
+    const els = {
+      sourcesList: document.getElementById("sources-list"),
+      sourcesTotalBadge: document.getElementById("sources-total-badge"),
+      activeSourcesPill: document.getElementById("active-sources-pill"),
+      toggleAllSources: document.getElementById("toggle-all-sources"),
+      fileUploadInput: document.getElementById("file-upload-input"),
+      modelSelect: document.getElementById("model-select"),
+      modelStatusDot: document.getElementById("model-status-dot"),
+      btnManageModels: document.getElementById("btn-manage-models"),
+      modelsManagerModal: document.getElementById("models-manager-modal"),
+      modelsManagerList: document.getElementById("models-manager-list"),
+      modelProgressBanner: document.getElementById("model-progress-banner"),
+      modelProgressText: document.getElementById("model-progress-text"),
+      modelProgressPct: document.getElementById("model-progress-pct"),
+      modelLinearProgress: document.getElementById("model-linear-progress"),
+      btnOpenCollections: document.getElementById("btn-open-collections"),
+      collectionsModal: document.getElementById("collections-modal"),
+      collectionsList: document.getElementById("collections-list"),
+      samplesList: document.getElementById("samples-list"),
+      collectionsCountBadge: document.getElementById("collections-count-badge"),
+      tabBtnCollections: document.getElementById("tab-btn-collections"),
+      tabBtnSamples: document.getElementById("tab-btn-samples"),
+      tabPaneCollections: document.getElementById("tab-pane-collections"),
+      tabPaneSamples: document.getElementById("tab-pane-samples"),
+      chatStream: document.getElementById("chat-stream"),
+      chatForm: document.getElementById("chat-form"),
+      chatInput: document.getElementById("chat-input"),
+      chatSendBtn: document.getElementById("chat-send-btn"),
+      chatAttachImgBtn: document.getElementById("chat-attach-img-btn"),
+      chatImgFileInput: document.getElementById("chat-img-file-input"),
+      chatImgPreviewBar: document.getElementById("chat-img-preview-bar"),
+      chatImgPreviewThumb: document.getElementById("chat-img-preview-thumb"),
+      chatImgPreviewName: document.getElementById("chat-img-preview-name"),
+      chatImgRemoveBtn: document.getElementById("chat-img-remove-btn"),
+      notesList: document.getElementById("notes-list"),
+      addSourceModal: document.getElementById("add-source-modal"),
+      sourceModal: document.getElementById("source-modal"),
+      sourceModalTitle: document.getElementById("source-modal-title"),
+      sourceModalBody: document.getElementById("source-modal-body"),
+      noteModal: document.getElementById("note-modal"),
+      noteTitleInput: document.getElementById("note-title-input"),
+      noteContentInput: document.getElementById("note-content-input"),
+      researchModal: document.getElementById("research-modal"),
+      researchTopicInput: document.getElementById("research-topic-input"),
+      researchOutputPreview: document.getElementById("research-output-preview"),
+      importResearchBtn: document.getElementById("import-research-btn")
+    };
+
+    // Fallback for browsers without <dialog closedby="any"> support
+    if (!("closedBy" in HTMLDialogElement.prototype)) {
+      document.querySelectorAll("dialog.nb-modal").forEach(dialog => {
+        dialog.addEventListener("click", (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const isDialogContent = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (!isDialogContent) dialog.close();
+        });
+      });
+    }
+
+    // Theme Management (Material Design 3: System default / Light / Dark)
+    const themeSegBtns = document.querySelectorAll(".theme-seg-btn");
+
+    function getThemePreference() {
+      try {
+        const stored = localStorage.getItem("color-scheme");
+        if (stored === "light" || stored === "dark") return stored;
+      } catch (_) {}
+      return "system";
+    }
+
+    function applyThemePreference(pref) {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (pref === "light" || pref === "dark") {
+        try { localStorage.setItem("color-scheme", pref); } catch (_) {}
+        meta.content = pref;
+      } else {
+        try { localStorage.removeItem("color-scheme"); } catch (_) {}
+        meta.content = "light dark";
+      }
+      themeSegBtns.forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-theme-choice") === pref);
+      });
+    }
+
+    themeSegBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        applyThemePreference(btn.getAttribute("data-theme-choice"));
+      });
+    });
+
+    applyThemePreference(getThemePreference());
+
+    function getFileIconName(src) {
+      const lower = src.name.toLowerCase();
+      if (src.media_type === "image" || /\.(png|jpg|jpeg|webp|gif)$/.test(lower)) return "image";
+      if (src.media_type === "audio" || /\.(mp3|wav|m4a|ogg)$/.test(lower)) return "graphic_eq";
+      if (src.media_type === "table" || /\.(csv|tsv)$/.test(lower)) return "table_chart";
+      if (lower.startsWith("youtube_")) return "smart_display";
+      if (lower.startsWith("web_")) return "language";
+      if (lower.endsWith(".pdf")) return "picture_as_pdf";
+      if (lower.endsWith(".epub")) return "auto_stories";
+      if (lower.endsWith(".docx")) return "description";
+      return "article";
+    }
+
+    function renderModels() {
+      els.modelSelect.innerHTML = "";
+      state.models.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        const badge = m.downloaded ? `✓ En Disco (${m.size_on_disk_mb || m.size_label} MB)` : `⬇ Descargar HF (${m.size_label})`;
+        opt.textContent = `${m.name} [${badge}]`;
+        if (m.id === state.activeModelId) opt.selected = true;
+        els.modelSelect.appendChild(opt);
+      });
+      renderModelsManagerModal();
+    }
+
+    function renderModelsManagerModal() {
+      if (!els.modelsManagerList) return;
+      els.modelsManagerList.innerHTML = "";
+      state.models.forEach(m => {
+        const card = document.createElement("div");
+        card.className = "collection-item-card";
+        const isActive = m.id === state.activeModelId && m.active;
+        const statusBadge = isActive
+          ? `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c;">⚡ Activo en GPU Metal</span>`
+          : (m.downloaded
+              ? `<span class="collection-file-chip">✓ Guardado en disco (${m.size_on_disk_mb || m.size_label} MB)</span>`
+              : `<span class="collection-file-chip">☁️ En Hugging Face (${m.size_label})</span>`);
+
+        card.innerHTML = `
+          <div class="collection-item-header">
+            <div class="collection-title">
+              <span class="material-symbols-outlined" style="color:var(--accent);">memory</span>
+              <span>${m.name}</span>
+            </div>
+            ${statusBadge}
+          </div>
+          <div class="collection-desc">Repositorio: <code>${m.repo_id}</code></div>
+          <div style="display:flex; justify-content:flex-end; gap:8px; margin-block-start:6px;">
+            <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 12px; font-size:0.76rem;">
+              <span class="material-symbols-outlined" style="font-size:15px;">${m.downloaded ? 'bolt' : 'download'}</span>
+              <span>${isActive ? 'Recargar en GPU' : (m.downloaded ? 'Cargar en GPU (Descarga el otro)' : 'Descargar y Activar')}</span>
+            </button>
+            ${m.downloaded ? `
+              <button type="button" class="btn-mini btn-delete-model-disk" data-mid="${m.id}" style="color:var(--danger); border-color:var(--danger);">
+                <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                <span>Borrar del disco</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        els.modelsManagerList.appendChild(card);
+      });
+
+      els.modelsManagerList.querySelectorAll(".btn-load-model").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const mid = btn.getAttribute("data-mid");
+          await switchModelWithProgress(mid);
+        });
+      });
+
+      els.modelsManagerList.querySelectorAll(".btn-delete-model-disk").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const mid = btn.getAttribute("data-mid");
+          btn.disabled = true;
+          btn.textContent = "Borrando...";
+          const res = await fetch(`/api/models/delete?model_id=${encodeURIComponent(mid)}`, { method: "DELETE" });
+          const data = await res.json();
+          if (data.status === "ok") {
+            state.models = data.models;
+            renderModels();
+          }
+        });
+      });
+    }
+
+    async function switchModelWithProgress(modelId) {
+      els.modelSelect.disabled = true;
+      els.modelStatusDot.classList.add("downloading");
+      els.modelProgressBanner.style.display = "flex";
+      els.modelProgressText.textContent = "Liberando modelo anterior de GPU Metal e iniciando...";
+      els.modelProgressPct.textContent = "0%";
+      els.modelLinearProgress.indeterminate = true;
+
+      const pollTimer = setInterval(async () => {
+        try {
+          const pRes = await fetch("/api/models/progress");
+          const pData = await pRes.json();
+          if (pData && pData.active) {
+            els.modelProgressText.textContent = pData.status_text || "Descargando de Hugging Face...";
+            els.modelProgressPct.textContent = `${pData.percent || 0}%`;
+            if (pData.percent > 0 && pData.percent < 100) {
+              els.modelLinearProgress.indeterminate = false;
+              els.modelLinearProgress.value = pData.percent / 100;
+            } else {
+              els.modelLinearProgress.indeterminate = true;
+            }
+          }
+        } catch (_) {}
+      }, 400);
+
+      try {
+        const res = await fetch("/api/models/select", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model_id: modelId })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          state.activeModelId = data.active_model_id;
+          state.models = data.models || state.models;
+          els.modelLinearProgress.indeterminate = false;
+          els.modelLinearProgress.value = 1;
+          els.modelProgressText.textContent = `✓ ${data.name} cargado en GPU Metal`;
+          els.modelProgressPct.textContent = "100%";
+          renderModels();
+          setTimeout(() => {
+            els.modelProgressBanner.style.display = "none";
+          }, 1800);
+        }
+      } finally {
+        clearInterval(pollTimer);
+        els.modelSelect.disabled = false;
+        els.modelStatusDot.classList.remove("downloading");
+      }
+    }
+
+    els.modelSelect.addEventListener("change", async (e) => {
+      await switchModelWithProgress(e.target.value);
+    });
+
+    els.btnManageModels.addEventListener("click", () => {
+      renderModelsManagerModal();
+      els.modelsManagerModal.showModal();
+    });
+    document.getElementById("close-models-manager-modal").addEventListener("click", () => {
+      els.modelsManagerModal.close();
+    });
+
+    function updateCounters() {
+      els.sourcesTotalBadge.textContent = `${state.sources.length} archivos`;
+      els.activeSourcesPill.textContent = `${state.selectedSources.size} fuentes`;
+    }
+
+    function renderSources() {
+      els.sourcesList.innerHTML = "";
+      state.sources.forEach(src => {
+        const isChecked = state.selectedSources.has(src.name);
+        const row = document.createElement("div");
+        row.className = `source-item ${isChecked ? "active" : ""}`;
+        const extLabel = src.media_type === "image" ? "IMG" : src.name.split(".").pop().slice(0, 4);
+        row.innerHTML = `
+          <span class="material-symbols-outlined source-icon">${getFileIconName(src)}</span>
+          <span class="source-name" title="${src.name}">${src.name}</span>
+          <span class="source-type-tag">${extLabel}</span>
+          <button type="button" class="source-delete-btn" data-del="${src.name}" title="Quitar documento">
+            <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+          </button>
+          <input type="checkbox" class="source-check" data-name="${src.name}" ${isChecked ? "checked" : ""} />
+        `;
+        row.addEventListener("click", (e) => {
+          if (e.target.closest(".source-delete-btn")) {
+            e.stopPropagation();
+            deleteSource(src.name);
+            return;
+          }
+          if (e.target.tagName === "INPUT") {
+            if (e.target.checked) state.selectedSources.add(src.name);
+            else state.selectedSources.delete(src.name);
+            syncSelectedToBackend();
+            renderSources();
+            updateCounters();
+          } else {
+            inspectSource(src.name);
+          }
+        });
+        els.sourcesList.appendChild(row);
+      });
+      updateCounters();
+    }
+
+    async function deleteSource(filename) {
+      const res = await fetch(`/api/sources/delete?name=${encodeURIComponent(filename)}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      state.sources = data.sources || [];
+      state.selectedSources.delete(filename);
+      if (els.sourceModal.open && state.currentInspectedSource === filename) {
+        els.sourceModal.close();
+      }
+      renderSources();
+    }
+
+    async function deleteNote(title) {
+      const res = await fetch(`/api/notes/delete?title=${encodeURIComponent(title)}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      state.notes = data.notes || [];
+      renderNotes();
+    }
+
+    async function syncSelectedToBackend() {
+      await fetch("/api/sources/select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selected: Array.from(state.selectedSources) })
+      });
+    }
+
+    async function loadInitialData() {
+      const res = await fetch("/api/state");
+      const data = await res.json();
+      state.sources = data.sources || [];
+      state.selectedSources = new Set(data.selected || state.sources.map(s => s.name));
+      state.notes = data.notes || [];
+      state.models = data.models || [];
+      state.collections = data.collections || [];
+      state.samples = data.samples || [];
+      state.activeModelId = data.active_model_id || "";
+      renderModels();
+      renderCollections();
+      renderSamples();
+      renderSources();
+      renderNotes();
+    }
+
+    function renderSamples() {
+      els.samplesList.innerHTML = "";
+      if (!state.samples.length) {
+        els.samplesList.innerHTML = `<div style="grid-column: 1 / -1; font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No hay samples disponibles.</div>`;
+        return;
+      }
+      state.samples.forEach(s => {
+        const card = document.createElement("div");
+        card.className = "sample-item-card";
+        const inWorkspaceBadge = s.is_in_workspace
+          ? `<span style="font-size:0.72rem; color:#34a853; font-weight:600;">✓ En workspace</span>`
+          : "";
+        card.innerHTML = `
+          <div class="sample-header">
+            <span class="material-symbols-outlined" style="font-size:20px; color:var(--accent);">description</span>
+            <span class="sample-name" title="${s.filename}">${s.filename}</span>
+            <button type="button" class="btn btn-primary btn-load-single-sample" data-file="${s.filename}" style="padding:3px 9px; font-size:0.72rem;">
+              <span class="material-symbols-outlined" style="font-size:15px;">add</span> Cargar
+            </button>
+          </div>
+          <div class="sample-meta">
+            <span>${s.ext.toUpperCase().slice(1)} • ${s.size}</span>
+            ${inWorkspaceBadge}
+          </div>
+        `;
+        els.samplesList.appendChild(card);
+      });
+
+      els.samplesList.querySelectorAll(".btn-load-single-sample").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const fname = btn.getAttribute("data-file");
+          btn.disabled = true;
+          const oldText = btn.innerHTML;
+          btn.textContent = "Cargando...";
+          try {
+            const res = await fetch("/api/samples/load", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ filenames: [fname], replace_existing: false })
+            });
+            const data = await res.json();
+            if (data.status === "ok") {
+              state.sources = data.sources;
+              data.imported.forEach(f => state.selectedSources.add(f));
+              renderSources();
+              loadInitialData();
+              els.collectionsModal.close();
+            }
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+          }
+        });
+      });
+    }
+
+    function renderCollections() {
+      if (els.collectionsCountBadge) {
+        els.collectionsCountBadge.textContent = `${state.collections.length} temas`;
+      }
+      els.collectionsList.innerHTML = "";
+      state.collections.forEach(col => {
+        const card = document.createElement("div");
+        card.className = "collection-item-card";
+        const tags = col.files.map(f => `<span class="collection-file-chip">${f}</span>`).join("");
+        card.innerHTML = `
+          <div class="collection-item-header">
+            <div class="collection-title">
+              <span class="material-symbols-outlined" style="color:var(--accent);">${col.icon || 'auto_stories'}</span>
+              <span>${col.name}</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn btn-primary btn-load-col" data-col="${col.id}" data-replace="false" style="padding:4px 10px; font-size:0.75rem;">
+                <span class="material-symbols-outlined" style="font-size:16px;">add</span> Cargar
+              </button>
+              <button type="button" class="btn btn-load-col" data-col="${col.id}" data-replace="true" style="padding:4px 10px; font-size:0.75rem;" title="Reemplazar el espacio de trabajo con esta colección">
+                <span class="material-symbols-outlined" style="font-size:16px;">swap_horiz</span> Reemplazar
+              </button>
+            </div>
+          </div>
+          <div class="collection-desc">${col.description}</div>
+          <div class="collection-files-tags">${tags}</div>
+        `;
+        els.collectionsList.appendChild(card);
+      });
+
+      els.collectionsList.querySelectorAll(".btn-load-col").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const cid = btn.getAttribute("data-col");
+          const replace = btn.getAttribute("data-replace") === "true";
+          btn.disabled = true;
+          const oldText = btn.innerHTML;
+          btn.textContent = "Cargando...";
+          try {
+            const res = await fetch("/api/collections/load", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ collection_id: cid, replace_existing: replace })
+            });
+            const data = await res.json();
+            if (data.status === "ok") {
+              state.sources = data.sources;
+              if (replace) {
+                state.selectedSources = new Set(data.selected);
+              } else {
+                data.imported.forEach(f => state.selectedSources.add(f));
+              }
+              renderSources();
+              els.collectionsModal.close();
+            }
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+          }
+        });
+      });
+    }
+
+    async function inspectSource(filename) {
+      state.currentInspectedSource = filename;
+      const res = await fetch(`/api/sources/content?name=${encodeURIComponent(filename)}`);
+      const data = await res.json();
+      els.sourceModalTitle.textContent = `${filename} (${data.chunks_count} secciones)`;
+      if (data.media_type === "image" && data.image_data_uri) {
+        els.sourceModalBody.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <img src="${data.image_data_uri}" alt="${filename}" style="max-inline-size:100%; max-block-size:50dvh; border-radius:12px; border:1px solid var(--border-subtle);" />
+            <p>${data.preview}</p>
+          </div>
+        `;
+      } else {
+        els.sourceModalBody.textContent = data.preview || "Sin contenido.";
+      }
+      els.sourceModal.showModal();
+    }
+
+    function renderNotes() {
+      els.notesList.innerHTML = "";
+      if (state.notes.length === 0) {
+        els.notesList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No hay notas guardadas todavía. Guarda respuestas del chat o crea una nota nueva.</div>`;
+        return;
+      }
+      state.notes.forEach(note => {
+        const card = document.createElement("div");
+        card.className = "note-card";
+        card.innerHTML = `
+          <div class="note-card-header">
+            <span>📌 ${note.title}</span>
+            <button type="button" class="source-delete-btn" title="Borrar nota">
+              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+            </button>
+          </div>
+          <div class="note-card-body">${note.content}</div>
+        `;
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".source-delete-btn")) {
+            e.stopPropagation();
+            deleteNote(note.title);
+            return;
+          }
+          els.noteTitleInput.value = note.title;
+          els.noteContentInput.value = note.content;
+          els.noteModal.showModal();
+        });
+        els.notesList.appendChild(card);
+      });
+    }
+
+    marked.setOptions({
+      gfm: true,
+      breaks: true
+    });
+
+    function renderMarkdownAndCitations(raw) {
+      if (!raw) return "";
+      let html = marked.parse(raw);
+      html = DOMPurify.sanitize(html);
+      html = html.replace(/\[([^\]]+)\]/g, (match, inner) => {
+        return `<span class="citation-badge" data-cite="${inner}">📎 ${inner}</span>`;
+      });
+      return html;
+    }
+
+    async function sendChatMessage(message, actionType = "chat") {
+      if (!message.trim() && !state.currentAttachedImageUri) return;
+
+      const userDiv = document.createElement("div");
+      userDiv.className = "msg user";
+
+      const attachedUri = state.currentAttachedImageUri;
+      if (attachedUri) {
+        const imgEl = document.createElement("img");
+        imgEl.className = "msg-attached-img";
+        imgEl.src = attachedUri;
+        userDiv.appendChild(imgEl);
+      }
+      const textSpan = document.createElement("span");
+      textSpan.textContent = message || "Analiza esta imagen adjunta.";
+      userDiv.appendChild(textSpan);
+      els.chatStream.appendChild(userDiv);
+
+      const botWrap = document.createElement("div");
+      botWrap.className = "msg assistant";
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "msg-content";
+      contentDiv.innerHTML = `
+        <div class="thinking-box">
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          <span class="thinking-text">Pensando y analizando fuentes...</span>
+        </div>
+      `;
+      const actionsDiv = document.createElement("div");
+      actionsDiv.className = "msg-actions";
+      botWrap.appendChild(contentDiv);
+      botWrap.appendChild(actionsDiv);
+      els.chatStream.appendChild(botWrap);
+      els.chatStream.scrollTop = els.chatStream.scrollHeight;
+
+      els.chatInput.value = "";
+      els.chatSendBtn.disabled = true;
+
+      // Clear current attachment bar
+      clearAttachedImage();
+
+      try {
+        const response = await fetch("/api/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message || "Describe e interpreta detalladamente esta imagen.",
+            action_type: actionType,
+            selected: Array.from(state.selectedSources),
+            history: state.chatHistory,
+            image_uri: attachedUri
+          })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let fullText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+          contentDiv.innerHTML = renderMarkdownAndCitations(fullText);
+          els.chatStream.scrollTop = els.chatStream.scrollHeight;
+        }
+
+        state.chatHistory.push({ role: "user", content: message });
+        state.chatHistory.push({ role: "assistant", content: fullText });
+
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "btn-mini";
+        saveBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:15px;">push_pin</span> Guardar en Studio`;
+        saveBtn.addEventListener("click", async () => {
+          const title = `Nota_${new Date().toLocaleTimeString("es-AR", { hour12: false }).replace(/:/g, "")}`;
+          await saveNoteToServer(title, fullText);
+        });
+        actionsDiv.appendChild(saveBtn);
+
+        contentDiv.querySelectorAll(".citation-badge").forEach(badge => {
+          badge.addEventListener("click", () => {
+            const citeText = badge.getAttribute("data-cite");
+            const matchedSource = state.sources.find(s => citeText.toLowerCase().includes(s.name.toLowerCase().split(".")[0]));
+            if (matchedSource) inspectSource(matchedSource.name);
+          });
+        });
+
+      } catch (err) {
+        contentDiv.textContent = `Error al generar respuesta: ${err.message}`;
+      } finally {
+        els.chatSendBtn.disabled = false;
+      }
+    }
+
+    async function saveNoteToServer(title, content) {
+      const res = await fetch("/api/notes/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content })
+      });
+      const data = await res.json();
+      state.notes = data.notes || [];
+      renderNotes();
+    }
+
+    // Event Listeners
+    els.chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendChatMessage(els.chatInput.value, "chat");
+    });
+
+    document.querySelectorAll(".suggestion-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const action = chip.getAttribute("data-action");
+        sendChatMessage(chip.textContent.trim(), action);
+      });
+    });
+
+    document.querySelectorAll(".studio-tile").forEach(tile => {
+      tile.addEventListener("click", () => {
+        const action = tile.getAttribute("data-studio");
+        const label = tile.querySelector(".tile-label").textContent;
+        sendChatMessage(`Genera un artefacto de Studio: ${label}`, action);
+      });
+    });
+
+    els.toggleAllSources.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        state.sources.forEach(s => state.selectedSources.add(s.name));
+      } else {
+        state.selectedSources.clear();
+      }
+      syncSelectedToBackend();
+      renderSources();
+    });
+
+    // Image Attachment Handlers
+    els.chatAttachImgBtn.addEventListener("click", () => {
+      els.chatImgFileInput.click();
+    });
+
+    els.chatImgFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        state.currentAttachedImageUri = ev.target.result;
+        els.chatImgPreviewThumb.src = ev.target.result;
+        els.chatImgPreviewName.textContent = file.name;
+        els.chatImgPreviewBar.style.display = "flex";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function clearAttachedImage() {
+      state.currentAttachedImageUri = null;
+      els.chatImgFileInput.value = "";
+      els.chatImgPreviewThumb.src = "";
+      els.chatImgPreviewName.textContent = "";
+      els.chatImgPreviewBar.style.display = "none";
+    }
+
+    els.chatImgRemoveBtn.addEventListener("click", clearAttachedImage);
+
+    // Add Sources Modal & File / URL / Paste handlers
+    document.getElementById("btn-open-add-source").addEventListener("click", () => {
+      els.addSourceModal.showModal();
+    });
+    document.getElementById("close-add-source-modal").addEventListener("click", () => els.addSourceModal.close());
+
+    // Collections Modal Handlers & Tab Switching
+    els.btnOpenCollections.addEventListener("click", () => {
+      els.collectionsModal.showModal();
+    });
+    document.getElementById("close-collections-modal").addEventListener("click", () => els.collectionsModal.close());
+
+    els.tabBtnCollections.addEventListener("click", () => {
+      els.tabBtnCollections.classList.add("active");
+      els.tabBtnSamples.classList.remove("active");
+      els.tabPaneCollections.style.display = "block";
+      els.tabPaneSamples.style.display = "none";
+    });
+
+    els.tabBtnSamples.addEventListener("click", () => {
+      els.tabBtnSamples.classList.add("active");
+      els.tabBtnCollections.classList.remove("active");
+      els.tabPaneSamples.style.display = "block";
+      els.tabPaneCollections.style.display = "none";
+    });
+
+    document.getElementById("trigger-file-picker-btn").addEventListener("click", () => {
+      els.fileUploadInput.click();
+    });
+
+    els.fileUploadInput.addEventListener("change", async (e) => {
+      const files = e.target.files;
+      if (!files.length) return;
+      const formData = new FormData();
+      for (const f of files) formData.append("files", f);
+      const res = await fetch("/api/sources/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      state.sources = data.sources;
+      data.uploaded.forEach(name => state.selectedSources.add(name));
+      renderSources();
+      if (els.addSourceModal.open) els.addSourceModal.close();
+    });
+
+    document.getElementById("import-url-source-btn").addEventListener("click", async () => {
+      const urlInput = document.getElementById("source-url-input");
+      const url = urlInput.value.trim();
+      if (!url) return;
+      const btn = document.getElementById("import-url-source-btn");
+      btn.disabled = true;
+      btn.textContent = "Importando...";
+      try {
+        const res = await fetch("/api/sources/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          state.sources = data.sources;
+          state.selectedSources.add(data.imported);
+          renderSources();
+          urlInput.value = "";
+          els.addSourceModal.close();
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Importar";
+      }
+    });
+
+    document.getElementById("save-paste-source-btn").addEventListener("click", async () => {
+      const titleEl = document.getElementById("paste-source-title");
+      const contentEl = document.getElementById("paste-source-content");
+      if (!contentEl.value.trim()) return;
+      const res = await fetch("/api/sources/paste", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: titleEl.value || "Texto_Pegado",
+          content: contentEl.value
+        })
+      });
+      const data = await res.json();
+      if (data.status === "ok") {
+        state.sources = data.sources;
+        state.selectedSources.add(data.imported);
+        renderSources();
+        titleEl.value = "";
+        contentEl.value = "";
+        els.addSourceModal.close();
+      }
+    });
+
+    // Modals
+    document.getElementById("close-source-modal").addEventListener("click", () => els.sourceModal.close());
+    document.getElementById("delete-source-modal-btn").addEventListener("click", () => {
+      if (state.currentInspectedSource) {
+        deleteSource(state.currentInspectedSource);
+      }
+    });
+    document.getElementById("close-note-modal").addEventListener("click", () => els.noteModal.close());
+    document.getElementById("close-research-modal").addEventListener("click", () => els.researchModal.close());
+
+    document.getElementById("btn-new-note").addEventListener("click", () => {
+      els.noteTitleInput.value = "";
+      els.noteContentInput.value = "";
+      els.noteModal.showModal();
+    });
+
+    document.getElementById("save-note-confirm").addEventListener("click", async () => {
+      await saveNoteToServer(els.noteTitleInput.value || "Nota_Cuaderno", els.noteContentInput.value);
+      els.noteModal.close();
+    });
+
+    document.getElementById("btn-open-research").addEventListener("click", () => {
+      els.researchModal.showModal();
+    });
+
+    document.getElementById("run-research-btn").addEventListener("click", async () => {
+      const topic = els.researchTopicInput.value.trim();
+      if (!topic) return;
+      els.researchOutputPreview.textContent = "Investigando fuentes en la web...";
+      const res = await fetch("/api/research/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic })
+      });
+      const data = await res.json();
+      state.lastResearchTopic = topic;
+      state.lastResearchMarkdown = data.dossier;
+      els.researchOutputPreview.innerHTML = `<div class="msg-content">${renderMarkdownAndCitations(data.dossier)}</div>`;
+      els.importResearchBtn.disabled = false;
+    });
+
+    els.importResearchBtn.addEventListener("click", async () => {
+      const res = await fetch("/api/research/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: state.lastResearchTopic,
+          dossier: state.lastResearchMarkdown
+        })
+      });
+      const data = await res.json();
+      state.sources = data.sources;
+      state.selectedSources.add(data.imported);
+      renderSources();
+      els.researchModal.close();
+    });
+
+    document.getElementById("btn-clear-chat").addEventListener("click", () => {
+      state.chatHistory = [];
+      els.chatStream.innerHTML = "";
+    });
+
+    loadInitialData();
+  </script>
+</body>
+</html>

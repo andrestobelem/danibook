@@ -218,3 +218,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# macOS & Node
+.DS_Store
+node_modules/
+
+# Local runtime & heavy model/workspace data
+data/models/
+data/cache/
+data/workspace/
+data/notes/
+data/*.db
+data/collections/psicoanalisis_filosofia/*.pdf
+data/samples/freud_tomo_18.pdf
+browser_verification.png
+gradio_screen.png
+
