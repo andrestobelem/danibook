@@ -8,7 +8,7 @@
 
 ## 1. Motivación y Objetivos
 
-El objetivo de esta investigación es determinar si migrar partes del stack de **Danibook** a **Bun** ofrece ventajas concretas en velocidad, uso de memoria y simplicidad operativa sin comprometer la ejecución offline de modelos multimodales (Gemma 4) con aceleración Metal.
+El objetivo de esta investigación es determinar si migrar partes del stack de **DaniBookLM** a **Bun** ofrece ventajas concretas en velocidad, uso de memoria y simplicidad operativa sin comprometer la ejecución offline de modelos multimodales (Gemma 4) con aceleración Metal.
 
 Específicamente se evalúa:
 1. **Servidor HTTP y Streaming SSE**: `Bun.serve` frente a `FastAPI` (Uvicorn).

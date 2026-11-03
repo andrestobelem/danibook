@@ -1,7 +1,7 @@
 [project]
 name = "danibook"
 version = "0.1.0"
-description = "Add your description here"
+description = "DaniBookLM — Local, offline NotebookLM environment powered by Gemma 4 Multimodal on Apple Silicon Metal"
 readme = "README.md"
 authors = [
     { name = "Andrés Tobelem", email = "andres.tobelem@gmail.com" }

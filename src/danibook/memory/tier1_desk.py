@@ -54,7 +54,7 @@ class DeskMemory:
                 break
             doc = self.active_docs[filename]
             parts.append(f"## Documento Activo: {filename}")
-            text = doc.full_text.strip()
+            text = "".join(ch for ch in doc.full_text.strip() if ch == "\n" or ch == "\t" or ord(ch) >= 32)
             if len(text) > budget_per_doc:
                 text = text[:budget_per_doc] + f"\n\n[... Fragmento de {budget_per_doc} caracteres mostrado de un total de {len(doc.full_text):,}. El resto del libro está disponible para búsqueda en Archivo ...]"
             parts.append(text)

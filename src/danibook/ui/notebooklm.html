@@ -9,7 +9,7 @@
       document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem("color-scheme") ?? "light dark";
     } catch (_) {}
   </script>
-  <title>NotebookLM Local — Gemma 4 Multimodal</title>
+  <title>DaniBookLM — Gemma 4 Multimodal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
@@ -173,27 +173,34 @@
     }
 
     .brand-logo {
-      inline-size: 36px;
-      block-size: 36px;
+      inline-size: 38px;
+      block-size: 38px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #4285f4, #a8c7fa, #34a853);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
       display: grid;
       place-content: center;
-      font-weight: 700;
-      color: #062e6f;
-      font-size: 1.1rem;
-      box-shadow: 0 2px 6px rgba(66, 133, 244, 0.25);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .brand-logo svg {
+      inline-size: 24px;
+      block-size: 24px;
     }
 
     .notebook-title {
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 600;
       color: var(--text-primary);
       background: transparent;
       border: 1px solid transparent;
       padding: 6px 10px;
       border-radius: 10px;
-      min-inline-size: 320px;
+      field-sizing: content;
+      min-inline-size: 180px;
+      max-inline-size: 320px;
       font-family: inherit;
     }
 
@@ -244,11 +251,13 @@
       color: var(--text-primary);
       border: none;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       outline: none;
       padding-inline-end: 4px;
+      max-inline-size: 360px;
+      text-overflow: ellipsis;
     }
 
     .theme-toggle-btn {
@@ -598,21 +607,24 @@
       padding: 4px;
       border-radius: 8px;
       cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+      opacity: 0.28;
+      transition: opacity 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.15s ease;
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
     }
 
     .source-item:hover .source-delete-btn,
     .note-card:hover .source-delete-btn {
-      opacity: 1;
+      opacity: 0.65;
     }
 
     .source-delete-btn:hover {
+      opacity: 1 !important;
       color: var(--danger);
-      background: color-mix(in srgb, var(--danger) 15%, transparent);
+      background: color-mix(in srgb, var(--danger) 16%, transparent);
+      transform: scale(1.08);
     }
 
     /* CENTER COLUMN: CHAT */
@@ -621,7 +633,7 @@
       overflow-y: auto;
       scrollbar-gutter: stable;
       overscroll-behavior: contain;
-      padding: 20px 24px;
+      padding: 20px 24px 80px 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -880,6 +892,11 @@
       font-family: inherit;
       outline: none;
       min-inline-size: 0;
+      resize: none;
+      max-block-size: 130px;
+      line-height: 1.45;
+      field-sizing: content;
+      padding-block: 4px;
     }
 
     .send-circle-btn {
@@ -1063,6 +1080,92 @@
       line-height: 1.45;
     }
 
+    .note-card-body p {
+      margin: 0;
+      display: inline;
+    }
+
+    .note-card-body h1, .note-card-body h2, .note-card-body h3, .note-card-body h4 {
+      font-size: 0.82rem;
+      margin: 0 0 2px 0;
+      display: inline-block;
+    }
+
+    .note-card-body code {
+      background: var(--bg-card);
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 0.76rem;
+    }
+
+    /* Floating Selection-to-Note Action Pill */
+    #selection-action-pill {
+      position: absolute;
+      display: none;
+      z-index: 999;
+      background: var(--bg-panel);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: var(--radius-pill);
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    #selection-action-pill:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+      transform: translateY(-2px);
+    }
+
+    /* Note Modal Tabs (Edit / Preview) */
+    .note-tabs-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-block: 10px 14px;
+    }
+
+    .note-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .note-tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .note-preview-pane {
+      display: none;
+      min-block-size: 220px;
+      max-block-size: 400px;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      line-height: 1.6;
+      font-size: 0.88rem;
+    }
+
     /* Native Dialogs with Light-Dismiss */
     dialog.nb-modal {
       margin: auto;
@@ -1239,6 +1342,323 @@
       40% { transform: scale(1); opacity: 1; }
     }
 
+    /* Accessibility Focus & Visually Hidden Utilities */
+    :where(a:any-link, button, input, select, textarea, [tabindex="0"]):focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    input:not([type="range"]):user-invalid,
+    textarea:user-invalid {
+      border-color: var(--danger);
+    }
+
+    /* Typography legibility & wrapping */
+    h1, h2, h3, h4, .overview-title, .collection-title, .tile-label {
+      text-wrap: balance;
+    }
+
+    p, li, blockquote, .overview-desc, .collection-desc, .msg-content p {
+      text-wrap: pretty;
+    }
+
+    /* Custom Scrollbars */
+    .panel-body, .chat-stream, .modal-body, #collections-list, #samples-list, #models-manager-list {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--text-muted) 45%, transparent) transparent;
+    }
+
+    /* Source Filter Input */
+    .source-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .source-search-input {
+      inline-size: 100%;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 7px 12px 7px 32px;
+      font-size: 0.78rem;
+      font-family: inherit;
+    }
+
+    .source-search-input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .source-search-icon {
+      position: absolute;
+      inset-inline-start: 10px;
+      font-size: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Context Window Meter Pill */
+    .context-meter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-panel);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .context-meter-pill:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+
+    .context-meter-bar {
+      inline-size: 38px;
+      block-size: 6px;
+      border-radius: 999px;
+      background: var(--bg-card);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .context-meter-fill {
+      block-size: 100%;
+      inline-size: 12%;
+      background: #34a853;
+      transition: inline-size 0.25s ease, background 0.25s ease;
+    }
+
+    /* Toast Notification */
+    .nb-toast {
+      position: fixed;
+      inset-block-end: 24px;
+      inset-inline-end: 24px;
+      background: var(--bg-panel);
+      color: var(--text-primary);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-pill);
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 9999;
+    }
+
+    .nb-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Mobile / Tablet View Switcher Tabs (Only visible <= 960px) */
+    .mobile-tab-bar {
+      display: none;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-around;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .mobile-tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .mobile-tab-btn.active {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+
+    /* Responsive collapses gracefully */
+    @media (max-width: 1200px) {
+      .workspace-grid {
+        grid-template-columns: 290px minmax(0, 1fr) 310px;
+        gap: 10px;
+        padding: 0 12px 12px 12px;
+      }
+      .notebook-title {
+        min-inline-size: 140px;
+        max-inline-size: 220px;
+      }
+      .model-select {
+        max-inline-size: 240px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .top-bar {
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .header-meta {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .mobile-tab-bar {
+        display: flex;
+      }
+      .workspace-grid {
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        flex: 1;
+      }
+      .workspace-grid > .panel {
+        display: none;
+        inline-size: 100%;
+        block-size: calc(100dvh - 170px);
+      }
+      .workspace-grid > .panel.mobile-active {
+        display: flex;
+      }
+      .composer-inner {
+        padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .top-bar {
+        padding: 8px 10px;
+      }
+      .notebook-title {
+        display: none;
+      }
+      .brand span:nth-of-type(2) {
+        display: none;
+      }
+      .btn-mini span:not(.material-symbols-outlined) {
+        display: none;
+      }
+      .theme-seg-btn span:not(.material-symbols-outlined) {
+        display: none;
+      }
+      .theme-seg-btn {
+        padding: 6px 8px;
+      }
+      .context-meter-pill {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+      }
+      .model-select {
+        max-inline-size: 160px;
+        font-size: 0.72rem;
+      }
+      .workspace-grid > .panel {
+        block-size: calc(100dvh - 160px);
+      }
+      .studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Suggested Prompt Chips at the End of Chat Responses (NotebookLM style) */
+    .suggested-prompts-container {
+      margin-block-start: 18px;
+      margin-block-end: 14px;
+      padding-block: 14px;
+      border-block-start: 1px dashed var(--border-subtle);
+      border-block-end: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+      padding-inline: 14px;
+      border-radius: 14px;
+    }
+
+    .suggested-prompts-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .suggested-prompts-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .suggested-prompt-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.35;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .suggested-prompt-chip:hover {
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Confirmation Dialog Styling */
+    .confirm-modal-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .confirm-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-block-start: 10px;
+    }
+
     /* Model Progress Bar Banner */
     .model-progress-banner {
       display: none;
@@ -1273,32 +1693,65 @@
   <!-- Top App Bar (Material Design 3) -->
   <header class="top-bar">
     <div class="brand">
-      <div class="brand-logo">N</div>
-      <input type="text" class="notebook-title" value="Cuaderno de Investigación Local" aria-label="Notebook Title" />
+      <div class="brand-logo" aria-hidden="true" title="DaniBookLM">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="db-grad-1" x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#4285F4"/>
+              <stop offset="50%" stop-color="#7C4DFF"/>
+              <stop offset="100%" stop-color="#34A853"/>
+            </linearGradient>
+            <linearGradient id="db-grad-spark" x1="16" y1="2" x2="28" y2="14" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FBBC05"/>
+              <stop offset="100%" stop-color="#FF7043"/>
+            </linearGradient>
+          </defs>
+          <!-- Stylized open book / layered tablet -->
+          <path d="M5 8C5 6.89543 5.89543 6 7 6H14.5C15.3284 6 16 6.67157 16 7.5V25C16 25 14.5 24 12 24H7C5.89543 24 5 23.1046 5 22V8Z" fill="url(#db-grad-1)" opacity="0.88"/>
+          <path d="M27 8C27 6.89543 26.1046 6 25 6H17.5C16.6716 6 16 6.67157 16 7.5V25C16 25 17.5 24 20 24H25C26.1046 24 27 23.1046 27 22V8Z" fill="url(#db-grad-1)"/>
+          <path d="M16 7.5V24.5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+          <!-- AI Sparkle on top-right corner -->
+          <path d="M23 4L24.2 6.8L27 8L24.2 9.2L23 12L21.8 9.2L19 8L21.8 6.8L23 4Z" fill="url(#db-grad-spark)"/>
+        </svg>
+      </div>
+      <span style="font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; color:var(--text-primary);">DaniBookLM</span>
+      <span style="color:var(--border-subtle);" aria-hidden="true">/</span>
+      <input type="text" id="notebook-title-input" class="notebook-title" value="Cuaderno de Investigación Local" aria-label="Título del Cuaderno" />
+      <button type="button" id="btn-new-notebook" class="btn-mini" title="Crear un nuevo cuaderno limpio" aria-label="Nuevo Cuaderno">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; color:var(--accent);">add</span>
+        <span>Nuevo cuaderno</span>
+      </button>
     </div>
     <div class="header-meta">
+      <!-- Live Context Window Headroom & Auto-Compaction Indicator -->
+      <button type="button" id="context-meter-pill" class="context-meter-pill" title="Ventana de contexto libre (se compacta automáticamente al quedar <10%)" aria-label="Estado de ventana de contexto">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px; color:var(--accent);">data_usage</span>
+        <span id="context-meter-label">32K • 88% libre</span>
+        <span class="context-meter-bar" aria-hidden="true"><span id="context-meter-fill" class="context-meter-fill"></span></span>
+      </button>
+
       <!-- Dynamic Hugging Face Gemma Model Selector + Disk Management -->
       <div class="model-selector-wrap" title="Seleccionar modelo Gemma (se descarga el anterior de GPU y baja de Hugging Face si no está en disco)">
-        <span id="model-status-dot" class="status-dot"></span>
-        <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">memory</span>
+        <span id="model-status-dot" class="status-dot" aria-hidden="true"></span>
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px; color:var(--accent);">memory</span>
         <select id="model-select" class="model-select" aria-label="Seleccionar Modelo Gemma"></select>
-        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Gestionar y borrar modelos del disco">
-          <span class="material-symbols-outlined" style="font-size:16px;">hard_drive</span>
+        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Gestionar y borrar modelos del disco" aria-label="Gestionar modelos en disco y GPU">
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">hard_drive</span>
         </button>
       </div>
 
       <!-- Material 3 Segmented Theme Switcher: System (Default) / Light / Dark -->
       <div class="theme-segmented-group" role="group" aria-label="Selector de tema">
-        <button type="button" class="theme-seg-btn active" data-theme-choice="system" title="Modo Sistema (Por defecto)">
-          <span class="material-symbols-outlined" style="font-size:16px;">routine</span>
+        <button type="button" class="theme-seg-btn active" data-theme-choice="system" aria-pressed="true" title="Modo Sistema (Por defecto)">
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">routine</span>
           <span>System</span>
         </button>
-        <button type="button" class="theme-seg-btn" data-theme-choice="light" title="Modo Claro">
-          <span class="material-symbols-outlined" style="font-size:16px;">light_mode</span>
+        <button type="button" class="theme-seg-btn" data-theme-choice="light" aria-pressed="false" title="Modo Claro">
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">light_mode</span>
           <span>Light</span>
         </button>
-        <button type="button" class="theme-seg-btn" data-theme-choice="dark" title="Modo Oscuro">
-          <span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span>
+        <button type="button" class="theme-seg-btn" data-theme-choice="dark" aria-pressed="false" title="Modo Oscuro">
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">dark_mode</span>
           <span>Dark</span>
         </button>
       </div>
@@ -1306,45 +1759,76 @@
   </header>
 
   <!-- Official Google @material/web Progress Banner for Model Download & GPU Loading -->
-  <div id="model-progress-banner" class="model-progress-banner">
+  <div id="model-progress-banner" class="model-progress-banner" role="status" aria-live="polite">
     <div class="model-progress-header">
       <span id="model-progress-text">Preparando modelo...</span>
       <span id="model-progress-pct">0%</span>
     </div>
-    <md-linear-progress id="model-linear-progress" value="0" max="1"></md-linear-progress>
+    <md-linear-progress id="model-linear-progress" value="0" max="1" aria-label="Progreso de carga del modelo"></md-linear-progress>
   </div>
+
+  <!-- Non-intrusive Toast Notification -->
+  <div id="nb-toast" class="nb-toast" role="status" aria-live="polite"></div>
+
+  <!-- Mobile / Small Viewport Segmented Tab Switcher (Sources / Chat / Studio) -->
+  <nav class="mobile-tab-bar" aria-label="Navegación en pantallas pequeñas">
+    <button type="button" class="mobile-tab-btn" data-panel-target="panel-sources">
+      <span class="material-symbols-outlined" style="font-size:17px;">folder_open</span>
+      <span>Fuentes</span>
+    </button>
+    <button type="button" class="mobile-tab-btn active" data-panel-target="panel-chat">
+      <span class="material-symbols-outlined" style="font-size:17px;">forum</span>
+      <span>Chat</span>
+    </button>
+    <button type="button" class="mobile-tab-btn" data-panel-target="panel-studio">
+      <span class="material-symbols-outlined" style="font-size:17px;">dashboard_customize</span>
+      <span>Studio</span>
+    </button>
+  </nav>
 
   <!-- Main 3-Column NotebookLM Workspace -->
   <main class="workspace-grid">
 
     <!-- LEFT PANEL: SOURCES -->
-    <section class="panel" aria-label="Fuentes">
+    <aside id="panel-sources" class="panel" aria-labelledby="panel-sources-heading">
       <div class="panel-header">
-        <div class="panel-title">
-          <span class="material-symbols-outlined" style="color:var(--accent);">folder_open</span>
+        <h2 id="panel-sources-heading" class="panel-title">
+          <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">folder_open</span>
           <span>Fuentes</span>
-        </div>
+        </h2>
         <span id="sources-total-badge" style="font-size: 0.78rem; color: var(--text-muted);">0 archivos</span>
       </div>
       <div class="panel-body">
         <div class="source-actions">
           <button type="button" class="btn btn-primary" id="btn-open-add-source">
-            <span class="material-symbols-outlined">add</span>
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
             <span>Agregar fuente</span>
           </button>
           <button type="button" class="btn" id="btn-open-research">
-            <span class="material-symbols-outlined">travel_explore</span>
+            <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>
             <span>Deep Research</span>
           </button>
         </div>
 
         <button type="button" class="collections-bar-btn" id="btn-open-collections" title="Cargar colecciones temáticas precargadas">
           <div style="display:flex; align-items:center; gap:6px;">
-            <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">library_books</span>
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px; color:var(--accent);">library_books</span>
             <span>Colecciones listas</span>
           </div>
-          <span id="collections-count-badge" style="font-size:0.74rem; color:var(--text-muted);">4 temas</span>
+          <span id="collections-count-badge" style="font-size:0.74rem; color:var(--text-muted);">5 temas</span>
         </button>
+
+        <div class="source-search-wrap">
+          <span class="material-symbols-outlined source-search-icon" aria-hidden="true">search</span>
+          <input
+            type="search"
+            id="source-filter-input"
+            class="source-search-input"
+            placeholder="Filtrar entre tus fuentes..."
+            aria-label="Filtrar fuentes por nombre"
+            autocomplete="off"
+          />
+        </div>
 
         <input
           type="file"
@@ -1355,53 +1839,53 @@
         />
 
         <div class="select-all-bar">
-          <span>Seleccionar todas las fuentes</span>
-          <input type="checkbox" id="toggle-all-sources" checked class="source-check" title="Seleccionar todas" />
+          <label for="toggle-all-sources" style="cursor:pointer;">Seleccionar todas las fuentes</label>
+          <input type="checkbox" id="toggle-all-sources" checked class="source-check" aria-label="Seleccionar todas las fuentes" />
         </div>
 
         <div id="sources-list" class="sources-list">
           <!-- Dynamically populated sources -->
         </div>
       </div>
-    </section>
+    </aside>
 
     <!-- CENTER PANEL: CHAT -->
-    <section class="panel" aria-label="Chat">
+    <section id="panel-chat" class="panel mobile-active" aria-labelledby="panel-chat-heading">
       <div class="panel-header">
-        <div class="panel-title">
-          <span class="material-symbols-outlined" style="color:var(--accent);">forum</span>
+        <h1 id="panel-chat-heading" class="panel-title">
+          <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">forum</span>
           <span>Chat Multimodal</span>
-        </div>
+        </h1>
         <button type="button" class="btn-mini" id="btn-clear-chat">
-          <span class="material-symbols-outlined" style="font-size:16px;">restart_alt</span>
-          <span>Limpiar charla</span>
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">restart_alt</span>
+          <span>Reiniciar charla</span>
         </button>
       </div>
 
       <div id="chat-stream" class="chat-stream">
-        <div class="overview-banner">
+        <div id="overview-banner" class="overview-banner">
           <div class="overview-title">
-            <span class="material-symbols-outlined">auto_awesome</span>
+            <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
             <span>Guía del Cuaderno</span>
           </div>
           <div class="overview-desc">
-            Tus fuentes locales (libros, PDFs, EPUBs de Cervantes, tablas CSV, imágenes, audios y páginas web) están listas. Marca a la izquierda qué archivos e imágenes incluir en el contexto activo o usa una acción rápida.
+            Tus fuentes locales (libros, PDFs, EPUBs de Cervantes, tablas CSV, imágenes, audios y páginas web) están listas. Marca a la izquierda qué archivos e imágenes incluir en tu <b>Desk</b> activo o usa una acción rápida.
           </div>
           <div class="chip-row">
             <button type="button" class="suggestion-chip" data-action="summary">
-              <span class="material-symbols-outlined" style="font-size:16px;">summarize</span>
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">summarize</span>
               <span>Resumir fuentes activas</span>
             </button>
-            <button type="button" class="suggestion-chip" data-action="contradictions">
-              <span class="material-symbols-outlined" style="font-size:16px;">fact_check</span>
-              <span>Buscar contradicciones</span>
+            <button type="button" class="suggestion-chip" data-action="glossary">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">hub</span>
+              <span>Armar mapa conceptual y glosario</span>
             </button>
             <button type="button" class="suggestion-chip" data-action="timeline">
-              <span class="material-symbols-outlined" style="font-size:16px;">timeline</span>
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">timeline</span>
               <span>Armar línea de tiempo</span>
             </button>
             <button type="button" class="suggestion-chip" data-action="quotes">
-              <span class="material-symbols-outlined" style="font-size:16px;">format_quote</span>
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">format_quote</span>
               <span>Extraer citas clave</span>
             </button>
           </div>
@@ -1410,74 +1894,74 @@
 
       <div class="chat-composer-wrap">
         <div id="chat-img-preview-bar" class="chat-img-preview-bar">
-          <img id="chat-img-preview-thumb" class="chat-img-preview-thumb" src="" alt="Adjunto" />
+          <img id="chat-img-preview-thumb" class="chat-img-preview-thumb" src="" alt="Vista previa de imagen adjunta" />
           <span id="chat-img-preview-name" style="font-size:0.78rem; color:var(--text-primary); font-weight:600; flex:1 1 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
           <button type="button" class="btn-mini" id="chat-img-remove-btn" style="padding:2px 8px; font-size:0.7rem;">✕ Quitar</button>
         </div>
         <form id="chat-form" class="chat-composer">
-          <button type="button" class="chat-attach-btn" id="chat-attach-img-btn" title="Adjuntar imagen para que el modelo la vea">
-            <span class="material-symbols-outlined">add_photo_alternate</span>
+          <button type="button" class="chat-attach-btn" id="chat-attach-img-btn" title="Adjuntar imagen para que el modelo la vea" aria-label="Adjuntar imagen al chat">
+            <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
           </button>
           <input type="file" id="chat-img-file-input" accept="image/*" style="display:none;" />
-          <span id="active-sources-pill" class="source-counter-pill">0 fuentes</span>
-          <input
-            type="text"
+          <span id="active-sources-pill" class="source-counter-pill" title="Fuentes seleccionadas en el Desk">0 fuentes</span>
+          <textarea
             id="chat-input"
             class="chat-input"
-            placeholder="Pregunta sobre tus documentos o imágenes activas..."
-            autocomplete="off"
-          />
-          <button type="submit" id="chat-send-btn" class="send-circle-btn" title="Enviar">
-            <span class="material-symbols-outlined">arrow_upward</span>
+            rows="1"
+            placeholder="Pregunta sobre tus documentos o imágenes activas... (Enter para enviar, Shift+Enter nueva línea)"
+            aria-label="Escribe tu consulta para el cuaderno"
+          ></textarea>
+          <button type="submit" id="chat-send-btn" class="send-circle-btn" title="Enviar consulta" aria-label="Enviar consulta">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
           </button>
         </form>
       </div>
     </section>
 
     <!-- RIGHT PANEL: STUDIO -->
-    <section class="panel" aria-label="Studio">
+    <aside id="panel-studio" class="panel" aria-labelledby="panel-studio-heading">
       <div class="panel-header">
-        <div class="panel-title">
-          <span class="material-symbols-outlined" style="color:var(--accent);">dashboard_customize</span>
+        <h2 id="panel-studio-heading" class="panel-title">
+          <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">dashboard_customize</span>
           <span>Studio & Notas</span>
-        </div>
+        </h2>
         <button type="button" class="btn btn-primary" id="btn-new-note" style="padding: 6px 12px; font-size: 0.78rem;">
-          <span class="material-symbols-outlined" style="font-size:16px;">note_add</span>
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">note_add</span>
           <span>Nota</span>
         </button>
       </div>
 
       <div class="panel-body">
-        <div class="studio-section-title">Generar Artefacto</div>
+        <h3 class="studio-section-title">Generar Artefacto</h3>
         <div class="studio-grid">
           <button type="button" class="studio-tile" data-studio="summary">
-            <span class="material-symbols-outlined tile-icon">menu_book</span>
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">menu_book</span>
             <span class="tile-label">Guía de Estudio</span>
             <span class="tile-sub">Síntesis temática</span>
           </button>
-          <button type="button" class="studio-tile" data-studio="contradictions">
-            <span class="material-symbols-outlined tile-icon">balance</span>
-            <span class="tile-label">Auditoría</span>
-            <span class="tile-sub">Detectar huecos</span>
+          <button type="button" class="studio-tile" data-studio="glossary">
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">hub</span>
+            <span class="tile-label">Mapa Conceptual</span>
+            <span class="tile-sub">Glosario y relaciones</span>
           </button>
           <button type="button" class="studio-tile" data-studio="timeline">
-            <span class="material-symbols-outlined tile-icon">schedule</span>
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">schedule</span>
             <span class="tile-label">Cronología</span>
             <span class="tile-sub">Hitos y eventos</span>
           </button>
           <button type="button" class="studio-tile" data-studio="quotes">
-            <span class="material-symbols-outlined tile-icon">format_quote</span>
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">format_quote</span>
             <span class="tile-label">Citas Textuales</span>
             <span class="tile-sub">Fragmentos exactos</span>
           </button>
         </div>
 
-        <div class="studio-section-title" style="margin-block-start: 10px;">Notas Guardadas</div>
+        <h3 class="studio-section-title" style="margin-block-start: 10px;">Notas Guardadas</h3>
         <div id="notes-list" class="notes-grid">
           <!-- Dynamically populated notes -->
         </div>
       </div>
-    </section>
+    </aside>
 
   </main>
 
@@ -1494,8 +1978,8 @@
     <div class="add-source-grid">
       <!-- 1. Local Files (PDF, DOCX, EPUB, CSV, Images, Audio) -->
       <div class="add-source-card">
-        <h4><span class="material-symbols-outlined" style="color:var(--accent);">attach_file</span> Archivos y Multimedia</h4>
-        <p>Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.</p>
+        <h4><span class="material-symbols-outlined" style="color:var(--accent);">attach_file</span> Archivos Permitidos</h4>
+        <p id="add-source-files-desc">Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.</p>
         <button type="button" class="btn btn-primary" id="trigger-file-picker-btn" style="margin-block-start:auto;">
           <span class="material-symbols-outlined">folder</span> Elegir archivos del disco
         </button>
@@ -1581,6 +2065,24 @@
     <div id="source-modal-body" class="modal-body"></div>
   </dialog>
 
+  <!-- Generic Confirmation Dialog (Modal) -->
+  <dialog id="confirm-modal" class="nb-modal" closedby="any" aria-labelledby="confirm-modal-title">
+    <div class="modal-header">
+      <h3 id="confirm-modal-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined" style="color:var(--accent);">help_outline</span>
+        <span id="confirm-modal-heading">Confirmar Acción</span>
+      </h3>
+      <button type="button" class="btn-mini" id="confirm-modal-close-btn">✕ Cerrar</button>
+    </div>
+    <div class="confirm-modal-box">
+      <p id="confirm-modal-message" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5;"></p>
+      <div class="confirm-modal-actions">
+        <button type="button" class="btn" id="confirm-modal-cancel-btn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirm-modal-ok-btn">Aceptar</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Note Editor Modal -->
   <dialog id="note-modal" class="nb-modal" closedby="any" aria-labelledby="note-modal-title">
     <div class="modal-header">
@@ -1588,13 +2090,40 @@
       <button type="button" class="btn-mini" id="close-note-modal">✕ Cerrar</button>
     </div>
     <div>
-      <input type="text" id="note-title-input" class="note-title-field" placeholder="Título de la nota" />
-      <textarea id="note-content-input" class="note-editor-area" placeholder="Escribe o pega fragmentos..."></textarea>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="note-title-input" class="note-title-field" placeholder="Título de la nota" style="flex:1;" />
+        <button type="button" class="btn-mini" id="btn-suggest-note-title" title="Generar título sugerido con IA según el contenido" style="white-space:nowrap;">
+          <span class="material-symbols-outlined" style="font-size:15px; color:var(--accent);">auto_awesome</span>
+          <span>Sugerir título</span>
+        </button>
+      </div>
+
+      <!-- Markdown Tabs: Edit vs Visual Preview -->
+      <div class="note-tabs-header">
+        <button type="button" id="tab-note-edit" class="note-tab-btn active">
+          <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+          <span>Editar (Markdown)</span>
+        </button>
+        <button type="button" id="tab-note-preview" class="note-tab-btn">
+          <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
+          <span>Vista Previa Visual</span>
+        </button>
+      </div>
+
+      <textarea id="note-content-input" class="note-editor-area" placeholder="Escribe o pega texto en Markdown..."></textarea>
+      <div id="note-preview-pane" class="note-preview-pane"></div>
+
       <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button type="button" class="btn btn-primary" id="save-note-confirm">💾 Guardar Nota en Disco</button>
       </div>
     </div>
   </dialog>
+
+  <!-- Floating Selection-to-Note Action Pill -->
+  <button type="button" id="selection-action-pill" aria-label="Crear nota desde selección">
+    <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
+    <span>Crear nota de selección</span>
+  </button>
 
   <!-- Deep Research Modal -->
   <dialog id="research-modal" class="nb-modal" closedby="any" aria-labelledby="research-modal-title">
@@ -1638,6 +2167,7 @@
     const state = {
       sources: [],
       selectedSources: new Set(),
+      sourceFilterQuery: "",
       notes: [],
       models: [],
       collections: [],
@@ -1652,10 +2182,15 @@
 
     const els = {
       sourcesList: document.getElementById("sources-list"),
+      sourceFilterInput: document.getElementById("source-filter-input"),
       sourcesTotalBadge: document.getElementById("sources-total-badge"),
       activeSourcesPill: document.getElementById("active-sources-pill"),
       toggleAllSources: document.getElementById("toggle-all-sources"),
       fileUploadInput: document.getElementById("file-upload-input"),
+      contextMeterPill: document.getElementById("context-meter-pill"),
+      contextMeterLabel: document.getElementById("context-meter-label"),
+      contextMeterFill: document.getElementById("context-meter-fill"),
+      nbToast: document.getElementById("nb-toast"),
       modelSelect: document.getElementById("model-select"),
       modelStatusDot: document.getElementById("model-status-dot"),
       btnManageModels: document.getElementById("btn-manage-models"),
@@ -1674,6 +2209,9 @@
       tabBtnSamples: document.getElementById("tab-btn-samples"),
       tabPaneCollections: document.getElementById("tab-pane-collections"),
       tabPaneSamples: document.getElementById("tab-pane-samples"),
+      notebookTitleInput: document.getElementById("notebook-title-input"),
+      btnNewNotebook: document.getElementById("btn-new-notebook"),
+      overviewBanner: document.getElementById("overview-banner"),
       chatStream: document.getElementById("chat-stream"),
       chatForm: document.getElementById("chat-form"),
       chatInput: document.getElementById("chat-input"),
@@ -1692,6 +2230,17 @@
       noteModal: document.getElementById("note-modal"),
       noteTitleInput: document.getElementById("note-title-input"),
       noteContentInput: document.getElementById("note-content-input"),
+      btnSuggestNoteTitle: document.getElementById("btn-suggest-note-title"),
+      tabNoteEdit: document.getElementById("tab-note-edit"),
+      tabNotePreview: document.getElementById("tab-note-preview"),
+      notePreviewPane: document.getElementById("note-preview-pane"),
+      selectionActionPill: document.getElementById("selection-action-pill"),
+      confirmModal: document.getElementById("confirm-modal"),
+      confirmModalHeading: document.getElementById("confirm-modal-heading"),
+      confirmModalMessage: document.getElementById("confirm-modal-message"),
+      confirmModalOkBtn: document.getElementById("confirm-modal-ok-btn"),
+      confirmModalCancelBtn: document.getElementById("confirm-modal-cancel-btn"),
+      confirmModalCloseBtn: document.getElementById("confirm-modal-close-btn"),
       researchModal: document.getElementById("research-modal"),
       researchTopicInput: document.getElementById("research-topic-input"),
       researchOutputPreview: document.getElementById("research-output-preview"),
@@ -1736,7 +2285,9 @@
         meta.content = "light dark";
       }
       themeSegBtns.forEach(btn => {
-        btn.classList.toggle("active", btn.getAttribute("data-theme-choice") === pref);
+        const isActive = btn.getAttribute("data-theme-choice") === pref;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-pressed", String(isActive));
       });
     }
 
@@ -1761,6 +2312,165 @@
       return "article";
     }
 
+    function isCurrentModelMultimodal() {
+      const activeObj = state.models.find(m => m.id === state.activeModelId);
+      return Boolean(activeObj && activeObj.supports_vision);
+    }
+
+    function getActiveContextLength() {
+      const activeObj = state.models.find(m => m.id === state.activeModelId);
+      return (activeObj && activeObj.context_length) ? activeObj.context_length : 32768;
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      if (!els.nbToast) return;
+      els.nbToast.textContent = msg;
+      els.nbToast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        els.nbToast.classList.remove("show");
+      }, 2800);
+    }
+
+    function updateContextMeterUI(pendingMessage = "") {
+      if (!els.contextMeterLabel || !els.contextMeterFill) return;
+      const nCtx = getActiveContextLength();
+      const ctxLabelK = nCtx >= 32000 ? "32K" : "8K";
+
+      // Calculate actual character volume of selected sources
+      let activeSourcesChars = 0;
+      state.sources.forEach(src => {
+        if (state.selectedSources.has(src.name)) {
+          activeSourcesChars += (src.size_chars || 1200);
+        }
+      });
+      // Desk caps characters dynamically by model n_ctx (e.g. 100K chars for 32K or 24K for 8K)
+      const maxDeskChars = nCtx >= 32000 ? 90000 : 22000;
+      const deskCharsBudgeted = Math.min(activeSourcesChars, maxDeskChars);
+      const deskTokens = Math.ceil(deskCharsBudgeted / 3.0);
+
+      const historyTokens = state.chatHistory.reduce((acc, m) => acc + Math.ceil((m.content || "").length / 2.8), 0);
+      const pendingTokens = Math.ceil((pendingMessage || "").length / 2.8);
+      const outputReserve = Math.min(1536, Math.floor(nCtx * 0.15));
+
+      const totalUsedTokens = Math.min(nCtx, deskTokens + historyTokens + pendingTokens + outputReserve);
+      const usedRatio = Math.min(1.0, Math.max(0.04, totalUsedTokens / nCtx));
+      const usedPct = Math.round(usedRatio * 100);
+      const freePct = Math.max(0, 100 - usedPct);
+
+      els.contextMeterLabel.textContent = `${ctxLabelK} • ${usedPct}% ocupado (${freePct}% libre)`;
+      els.contextMeterFill.style.inlineSize = `${usedPct}%`;
+
+      if (freePct <= 10) {
+        els.contextMeterFill.style.background = "var(--danger)";
+      } else if (freePct <= 25) {
+        els.contextMeterFill.style.background = "#fbbc04";
+      } else {
+        els.contextMeterFill.style.background = "#34a853";
+      }
+    }
+
+    function autoCompactClientHistoryIfNeeded(pendingMessage = "") {
+      const nCtx = getActiveContextLength();
+      const deskAndOutputReserve = Math.floor(nCtx * 0.65);
+      const historyTokens = state.chatHistory.reduce((acc, m) => acc + Math.ceil((m.content || "").length / 2.5), 0);
+      const pendingTokens = Math.ceil((pendingMessage || "").length / 2.5);
+      const totalEstimated = deskAndOutputReserve + historyTokens + pendingTokens;
+      const remainingRatio = Math.max(0, (nCtx - totalEstimated) / nCtx);
+
+      if (remainingRatio < 0.10 && state.chatHistory.length > 4) {
+        const older = state.chatHistory.slice(0, -4);
+        const recent = state.chatHistory.slice(-4);
+        const digestLines = older.slice(-8).map(m =>
+          `- ${m.role === "user" ? "Usuario" : "Asistente"}: ${(m.content || "").slice(0, 160).trim()}`
+        );
+        state.chatHistory = [
+          {
+            role: "user",
+            content: `[Resumen compacto de turnos previos (<10% ventana libre)]:\n${digestLines.join("\n")}`
+          },
+          ...recent
+        ];
+        showToast("⚡ Contexto compactado automáticamente (<10% libre)");
+        updateContextMeterUI();
+        return true;
+      }
+      updateContextMeterUI(pendingMessage);
+      return false;
+    }
+
+    function updateMultimodalCapabilitiesUI() {
+      const isMulti = isCurrentModelMultimodal();
+      const addSourceTitle = document.querySelector("#add-source-modal-title span:last-child");
+      const addSourceDesc = document.getElementById("add-source-files-desc");
+
+      if (isMulti) {
+        els.chatAttachImgBtn.disabled = false;
+        els.chatAttachImgBtn.style.opacity = "1";
+        els.chatAttachImgBtn.style.cursor = "pointer";
+        els.chatAttachImgBtn.title = "Adjuntar archivo o imagen permitida (Modelo Multimodal activo)";
+        els.chatInput.placeholder = "Pregunta sobre tus documentos o imágenes activas...";
+        els.fileUploadInput.accept = ".pdf,.docx,.epub,.md,.markdown,.txt,.csv,.tsv,.json,.html,.png,.jpg,.jpeg,.webp,.gif,.mp3,.wav,.m4a,.ogg";
+        if (addSourceTitle) addSourceTitle.textContent = "Agregar Fuentes al Cuaderno (Multimodal)";
+        if (addSourceDesc) {
+          addSourceDesc.innerHTML = "Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.";
+        }
+      } else {
+        clearAttachedImage();
+        els.chatAttachImgBtn.disabled = true;
+        els.chatAttachImgBtn.style.opacity = "0.35";
+        els.chatAttachImgBtn.style.cursor = "not-allowed";
+        els.chatAttachImgBtn.title = "El modelo actual no es multimodal (solo texto). Selecciona Gemma 4 E2B o 12B para adjuntar imágenes.";
+        els.chatInput.placeholder = "Pregunta sobre tus documentos de texto activos (modelo solo texto)...";
+        els.fileUploadInput.accept = ".pdf,.docx,.epub,.md,.markdown,.txt,.csv,.tsv,.json,.html";
+        if (addSourceTitle) addSourceTitle.textContent = "Agregar Fuentes al Cuaderno (Solo Texto)";
+        if (addSourceDesc) {
+          addSourceDesc.innerHTML = "El modelo actual es de <b>solo texto</b>. Archivos permitidos: <b>.pdf, .docx, .epub, .md, .txt, .csv, .json, .html</b> (imágenes y audio deshabilitados).";
+        }
+      }
+    }
+
+    // Accessible Custom Confirmation Dialog
+    function showConfirmModal({ title, message, okText = "Aceptar", cancelText = "Cancelar" }) {
+      return new Promise((resolve) => {
+        if (!els.confirmModal) {
+          resolve(window.confirm(message));
+          return;
+        }
+        els.confirmModalHeading.textContent = title || "Confirmar Acción";
+        els.confirmModalMessage.textContent = message || "¿Deseas continuar?";
+        els.confirmModalOkBtn.textContent = okText;
+        els.confirmModalCancelBtn.textContent = cancelText;
+
+        const cleanup = () => {
+          els.confirmModalOkBtn.removeEventListener("click", onOk);
+          els.confirmModalCancelBtn.removeEventListener("click", onCancel);
+          els.confirmModalCloseBtn.removeEventListener("click", onCancel);
+          els.confirmModal.removeEventListener("cancel", onCancel);
+        };
+
+        const onOk = () => {
+          cleanup();
+          els.confirmModal.close();
+          resolve(true);
+        };
+
+        const onCancel = () => {
+          cleanup();
+          els.confirmModal.close();
+          resolve(false);
+        };
+
+        els.confirmModalOkBtn.addEventListener("click", onOk);
+        els.confirmModalCancelBtn.addEventListener("click", onCancel);
+        els.confirmModalCloseBtn.addEventListener("click", onCancel);
+        els.confirmModal.addEventListener("cancel", onCancel);
+
+        els.confirmModal.showModal();
+      });
+    }
+
     function renderModels() {
       els.modelSelect.innerHTML = "";
       state.models.forEach(m => {
@@ -1771,6 +2481,7 @@
         if (m.id === state.activeModelId) opt.selected = true;
         els.modelSelect.appendChild(opt);
       });
+      updateMultimodalCapabilitiesUI();
       renderModelsManagerModal();
     }
 
@@ -1785,7 +2496,11 @@
           ? `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c;">⚡ Activo en GPU Metal</span>`
           : (m.downloaded
               ? `<span class="collection-file-chip">✓ Guardado en disco (${m.size_on_disk_mb || m.size_label} MB)</span>`
-              : `<span class="collection-file-chip">☁️ En Hugging Face (${m.size_label})</span>`);
+              : `<span class="collection-file-chip" style="color:var(--accent); font-weight:600;">☁️ Requiere Descarga (${m.size_label})</span>`);
+
+        const actionBtnLabel = isActive
+          ? 'Recargar en GPU'
+          : (m.downloaded ? 'Cargar en GPU (Descarga el otro)' : 'Descargar de Hugging Face y Activar');
 
         card.innerHTML = `
           <div class="collection-item-header">
@@ -1795,11 +2510,13 @@
             </div>
             ${statusBadge}
           </div>
-          <div class="collection-desc">Repositorio: <code>${m.repo_id}</code></div>
+          <div class="collection-desc">
+            ${m.downloaded ? `Modelo listo en disco. Repositorio: <code>${m.repo_id}</code>` : `<b>El modelo no está en disco</b> (fue borrado o no se descargó). Ocupará aproximadamente ${m.size_label}.`}
+          </div>
           <div style="display:flex; justify-content:flex-end; gap:8px; margin-block-start:6px;">
             <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 12px; font-size:0.76rem;">
               <span class="material-symbols-outlined" style="font-size:15px;">${m.downloaded ? 'bolt' : 'download'}</span>
-              <span>${isActive ? 'Recargar en GPU' : (m.downloaded ? 'Cargar en GPU (Descarga el otro)' : 'Descargar y Activar')}</span>
+              <span>${actionBtnLabel}</span>
             </button>
             ${m.downloaded ? `
               <button type="button" class="btn-mini btn-delete-model-disk" data-mid="${m.id}" style="color:var(--danger); border-color:var(--danger);">
@@ -1815,13 +2532,22 @@
       els.modelsManagerList.querySelectorAll(".btn-load-model").forEach(btn => {
         btn.addEventListener("click", async () => {
           const mid = btn.getAttribute("data-mid");
-          await switchModelWithProgress(mid);
+          await requestModelSwitchWithConfirmation(mid);
         });
       });
 
       els.modelsManagerList.querySelectorAll(".btn-delete-model-disk").forEach(btn => {
         btn.addEventListener("click", async () => {
           const mid = btn.getAttribute("data-mid");
+          const targetObj = state.models.find(m => m.id === mid);
+          const confirmed = await showConfirmModal({
+            title: "Borrar Modelo del Disco",
+            message: `¿Estás seguro de que deseas borrar los archivos de '${targetObj ? targetObj.name : mid}' del disco? Se liberará espacio y si vuelves a elegirlo deberás descargarlo de nuevo.`,
+            okText: "Sí, borrar del disco",
+            cancelText: "Cancelar"
+          });
+          if (!confirmed) return;
+
           btn.disabled = true;
           btn.textContent = "Borrando...";
           const res = await fetch(`/api/models/delete?model_id=${encodeURIComponent(mid)}`, { method: "DELETE" });
@@ -1829,9 +2555,49 @@
           if (data.status === "ok") {
             state.models = data.models;
             renderModels();
+            showToast(`🗑️ Modelo '${targetObj ? targetObj.name : mid}' borrado del disco. Ahora figura listo para descargar.`);
           }
         });
       });
+    }
+
+    async function requestModelSwitchWithConfirmation(modelId) {
+      if (modelId === state.activeModelId) {
+        // Just reload
+        await switchModelWithProgress(modelId);
+        return;
+      }
+      const targetModel = state.models.find(m => m.id === modelId);
+      const currentModel = state.models.find(m => m.id === state.activeModelId);
+
+      let confirmMsg = "";
+      let confirmTitle = "";
+      let confirmOk = "Continuar";
+
+      if (targetModel && !targetModel.downloaded) {
+        confirmTitle = "Descargar Modelo de Hugging Face";
+        confirmMsg = `El modelo '${targetModel.name}' no está en disco (${targetModel.size_label}). Se descargará desde Hugging Face y se reemplazará '${currentModel ? currentModel.name : "el modelo activo"}' en la memoria GPU Metal. ¿Deseas iniciar la descarga?`;
+        confirmOk = "Descargar y Activar";
+      } else {
+        confirmTitle = "Cambiar Modelo en Memoria GPU";
+        confirmMsg = `¿Deseas descargar '${currentModel ? currentModel.name : "el modelo activo"}' de la memoria GPU Metal y cargar en su lugar '${targetModel ? targetModel.name : modelId}'?`;
+        confirmOk = "Cambiar Modelo";
+      }
+
+      const confirmed = await showConfirmModal({
+        title: confirmTitle,
+        message: confirmMsg,
+        okText: confirmOk,
+        cancelText: "Cancelar"
+      });
+
+      if (!confirmed) {
+        // Revert select dropdown to activeModelId
+        if (els.modelSelect) els.modelSelect.value = state.activeModelId;
+        return;
+      }
+
+      await switchModelWithProgress(modelId);
     }
 
     async function switchModelWithProgress(modelId) {
@@ -1886,7 +2652,7 @@
     }
 
     els.modelSelect.addEventListener("change", async (e) => {
-      await switchModelWithProgress(e.target.value);
+      await requestModelSwitchWithConfirmation(e.target.value);
     });
 
     els.btnManageModels.addEventListener("click", () => {
@@ -1900,23 +2666,41 @@
     function updateCounters() {
       els.sourcesTotalBadge.textContent = `${state.sources.length} archivos`;
       els.activeSourcesPill.textContent = `${state.selectedSources.size} fuentes`;
+      if (els.toggleAllSources) {
+        const total = state.sources.length;
+        const sel = state.selectedSources.size;
+        els.toggleAllSources.checked = total > 0 && sel === total;
+        els.toggleAllSources.indeterminate = sel > 0 && sel < total;
+      }
+      updateContextMeterUI(els.chatInput ? els.chatInput.value : "");
     }
 
     function renderSources() {
       els.sourcesList.innerHTML = "";
-      state.sources.forEach(src => {
+      const q = (state.sourceFilterQuery || "").trim().toLowerCase();
+      const filteredSources = q
+        ? state.sources.filter(src => src.name.toLowerCase().includes(q))
+        : state.sources;
+
+      if (filteredSources.length === 0) {
+        els.sourcesList.innerHTML = `<div style="font-size:0.78rem; color:var(--text-muted); text-align:center; padding:14px;">${q ? "No hay fuentes que coincidan con el filtro." : "Aún no hay fuentes en el cuaderno."}</div>`;
+        updateCounters();
+        return;
+      }
+
+      filteredSources.forEach(src => {
         const isChecked = state.selectedSources.has(src.name);
         const row = document.createElement("div");
         row.className = `source-item ${isChecked ? "active" : ""}`;
         const extLabel = src.media_type === "image" ? "IMG" : src.name.split(".").pop().slice(0, 4);
         row.innerHTML = `
-          <span class="material-symbols-outlined source-icon">${getFileIconName(src)}</span>
+          <span class="material-symbols-outlined source-icon" aria-hidden="true">${getFileIconName(src)}</span>
           <span class="source-name" title="${src.name}">${src.name}</span>
           <span class="source-type-tag">${extLabel}</span>
-          <button type="button" class="source-delete-btn" data-del="${src.name}" title="Quitar documento">
-            <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+          <button type="button" class="source-delete-btn" data-del="${src.name}" title="Quitar ${src.name}" aria-label="Quitar ${src.name}">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">delete</span>
           </button>
-          <input type="checkbox" class="source-check" data-name="${src.name}" ${isChecked ? "checked" : ""} />
+          <input type="checkbox" class="source-check" data-name="${src.name}" aria-label="Incluir ${src.name} en el Desk" ${isChecked ? "checked" : ""} />
         `;
         row.addEventListener("click", (e) => {
           if (e.target.closest(".source-delete-btn")) {
@@ -1952,13 +2736,14 @@
       renderSources();
     }
 
-    async function deleteNote(title) {
-      const res = await fetch(`/api/notes/delete?title=${encodeURIComponent(title)}`, {
+    async function deleteNote(noteIdOrTitle) {
+      const res = await fetch(`/api/notes/delete?id=${encodeURIComponent(noteIdOrTitle)}`, {
         method: "DELETE"
       });
       const data = await res.json();
       state.notes = data.notes || [];
       renderNotes();
+      showToast("🗑️ Nota eliminada");
     }
 
     async function syncSelectedToBackend() {
@@ -2033,6 +2818,7 @@
               renderSources();
               loadInitialData();
               els.collectionsModal.close();
+              triggerNotebookOverview();
             }
           } finally {
             btn.disabled = false;
@@ -2095,6 +2881,7 @@
               }
               renderSources();
               els.collectionsModal.close();
+              triggerNotebookOverview();
             }
           } finally {
             btn.disabled = false;
@@ -2131,27 +2918,63 @@
       state.notes.forEach(note => {
         const card = document.createElement("div");
         card.className = "note-card";
+        const parsedMarkdown = renderMarkdownAndCitations(note.content || "");
         card.innerHTML = `
           <div class="note-card-header">
-            <span>📌 ${note.title}</span>
-            <button type="button" class="source-delete-btn" title="Borrar nota">
-              <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-            </button>
+            <span style="font-weight:600;">📌 ${note.title}</span>
+            <div style="display:flex; align-items:center; gap:2px;">
+              <button type="button" class="btn-mini btn-convert-note" data-note-id="${note.id}" title="Incorporar esta nota como fuente en el cuaderno" style="padding:2px 6px; font-size:0.68rem;">
+                <span class="material-symbols-outlined" style="font-size:14px; color:var(--accent);">add_to_photos</span>
+                <span>Fuente</span>
+              </button>
+              <button type="button" class="source-delete-btn" data-del-note="${note.id}" title="Borrar nota">
+                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+              </button>
+            </div>
           </div>
-          <div class="note-card-body">${note.content}</div>
+          <div class="note-card-body">${parsedMarkdown}</div>
         `;
         card.addEventListener("click", (e) => {
-          if (e.target.closest(".source-delete-btn")) {
+          if (e.target.closest(".btn-convert-note")) {
             e.stopPropagation();
-            deleteNote(note.title);
+            convertNoteToSource(note.id);
             return;
           }
+          if (e.target.closest(".source-delete-btn")) {
+            e.stopPropagation();
+            deleteNote(note.id);
+            return;
+          }
+          state.editingNoteId = note.id;
+          state.editingNoteOriginalTitle = note.title;
           els.noteTitleInput.value = note.title;
           els.noteContentInput.value = note.content;
+          switchToNoteEditTab();
           els.noteModal.showModal();
         });
         els.notesList.appendChild(card);
       });
+    }
+
+    async function convertNoteToSource(noteId) {
+      try {
+        const res = await fetch("/api/notes/convert-to-source", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: noteId })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          state.sources = data.sources || [];
+          if (data.source_name) state.selectedSources.add(data.source_name);
+          renderSources();
+          showToast(`📄 Nota incorporada como fuente: "${data.source_name}"`);
+        } else {
+          alert(data.message || "Error al incorporar nota como fuente.");
+        }
+      } catch (err) {
+        alert("Error de conexión al convertir nota: " + err.message);
+      }
     }
 
     marked.setOptions({
@@ -2159,9 +2982,29 @@
       breaks: true
     });
 
+    function parseResponseAndSuggestions(raw) {
+      if (!raw) return { markdown: "", suggestions: [] };
+      const startTag = "<!-- SUGGESTED_PROMPTS_START -->";
+      const endTag = "<!-- SUGGESTED_PROMPTS_END -->";
+      const startIndex = raw.indexOf(startTag);
+      const endIndex = raw.indexOf(endTag);
+
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        const markdown = raw.substring(0, startIndex).trim();
+        const block = raw.substring(startIndex + startTag.length, endIndex);
+        const suggestions = block
+          .split("\n")
+          .map(line => line.replace(/^[-*•\d.]+\s*/, "").trim())
+          .filter(Boolean);
+        return { markdown, suggestions };
+      }
+      return { markdown: raw, suggestions: [] };
+    }
+
     function renderMarkdownAndCitations(raw) {
       if (!raw) return "";
-      let html = marked.parse(raw);
+      const { markdown } = parseResponseAndSuggestions(raw);
+      let html = marked.parse(markdown || raw);
       html = DOMPurify.sanitize(html);
       html = html.replace(/\[([^\]]+)\]/g, (match, inner) => {
         return `<span class="citation-badge" data-cite="${inner}">📎 ${inner}</span>`;
@@ -2210,6 +3053,9 @@
       // Clear current attachment bar
       clearAttachedImage();
 
+      // Auto-compact client history if remaining context window drops below 10%
+      autoCompactClientHistoryIfNeeded(message);
+
       try {
         const response = await fetch("/api/chat/stream", {
           method: "POST",
@@ -2236,17 +3082,77 @@
           els.chatStream.scrollTop = els.chatStream.scrollHeight;
         }
 
+        const { markdown, suggestions } = parseResponseAndSuggestions(fullText);
+        contentDiv.innerHTML = renderMarkdownAndCitations(markdown || fullText);
+
+        if (suggestions.length > 0) {
+          const sugContainer = document.createElement("div");
+          sugContainer.className = "suggested-prompts-container";
+          sugContainer.innerHTML = `
+            <div class="suggested-prompts-label">
+              <span class="material-symbols-outlined" style="font-size:14px; color:var(--accent);">auto_awesome</span>
+              <span>Continuar con</span>
+            </div>
+            <div class="suggested-prompts-list"></div>
+          `;
+          const sugList = sugContainer.querySelector(".suggested-prompts-list");
+          suggestions.forEach(sugText => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "suggested-prompt-chip";
+            chip.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px; color:var(--accent);">arrow_forward</span><span>${sugText}</span>`;
+            chip.addEventListener("click", () => {
+              sendChatMessage(sugText, "chat");
+            });
+            sugList.appendChild(chip);
+          });
+          contentDiv.appendChild(sugContainer);
+        }
+
+        setTimeout(() => {
+          els.chatStream.scrollTo({
+            top: els.chatStream.scrollHeight,
+            behavior: "smooth"
+          });
+        }, 120);
+
         state.chatHistory.push({ role: "user", content: message });
-        state.chatHistory.push({ role: "assistant", content: fullText });
+        state.chatHistory.push({ role: "assistant", content: markdown || fullText });
+        updateContextMeterUI();
 
         const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
         saveBtn.className = "btn-mini";
-        saveBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:15px;">push_pin</span> Guardar en Studio`;
+        saveBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">push_pin</span> Guardar en Studio`;
         saveBtn.addEventListener("click", async () => {
-          const title = `Nota_${new Date().toLocaleTimeString("es-AR", { hour12: false }).replace(/:/g, "")}`;
-          await saveNoteToServer(title, fullText);
+          saveBtn.disabled = true;
+          try {
+            const titleRes = await fetch("/api/notes/generate-title", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: (markdown || fullText).slice(0, 800) })
+            });
+            const titleData = await titleRes.json();
+            const noteTitle = (titleData && titleData.title) ? titleData.title : `Nota_${new Date().toLocaleTimeString("es-AR", { hour12: false }).replace(/:/g, "")}`;
+            await saveNoteToServer(noteTitle, markdown || fullText);
+            showToast(`📌 Nota guardada: "${noteTitle}"`);
+          } finally {
+            saveBtn.disabled = false;
+          }
         });
         actionsDiv.appendChild(saveBtn);
+
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "btn-mini";
+        copyBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">content_copy</span> Copiar`;
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(fullText);
+            showToast("📋 Respuesta copiada al portapapeles");
+          } catch (_) {}
+        });
+        actionsDiv.appendChild(copyBtn);
 
         contentDiv.querySelectorAll(".citation-badge").forEach(badge => {
           badge.addEventListener("click", () => {
@@ -2263,11 +3169,18 @@
       }
     }
 
-    async function saveNoteToServer(title, content) {
+    async function saveNoteToServer(title, content, noteId = null) {
+      const payload = {
+        title: title || "Nota de investigación",
+        content: content || "",
+      };
+      if (noteId) {
+        payload.id = noteId;
+      }
       const res = await fetch("/api/notes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       state.notes = data.notes || [];
@@ -2280,12 +3193,57 @@
       sendChatMessage(els.chatInput.value, "chat");
     });
 
-    document.querySelectorAll(".suggestion-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        const action = chip.getAttribute("data-action");
-        sendChatMessage(chip.textContent.trim(), action);
-      });
+    els.chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage(els.chatInput.value, "chat");
+      }
     });
+
+    els.chatInput.addEventListener("input", () => {
+      updateContextMeterUI(els.chatInput.value);
+    });
+
+    if (els.sourceFilterInput) {
+      els.sourceFilterInput.addEventListener("input", (e) => {
+        state.sourceFilterQuery = e.target.value;
+        renderSources();
+      });
+    }
+
+    if (els.contextMeterPill) {
+      els.contextMeterPill.addEventListener("click", () => {
+        if (state.chatHistory.length > 2) {
+          const older = state.chatHistory.slice(0, -2);
+          const recent = state.chatHistory.slice(-2);
+          const digestLines = older.slice(-8).map(m =>
+            `- ${m.role === "user" ? "Usuario" : "Asistente"}: ${(m.content || "").slice(0, 160).trim()}`
+          );
+          state.chatHistory = [
+            {
+              role: "user",
+              content: `[Resumen compacto de turnos previos]:\n${digestLines.join("\n")}`
+            },
+            ...recent
+          ];
+          updateContextMeterUI(els.chatInput.value);
+          showToast("⚡ Historial compactado manualmente");
+        } else {
+          showToast("✓ Ventana de contexto óptima (se compacta sola al quedar <10%)");
+        }
+      });
+    }
+
+    function bindSuggestionChips(root = document) {
+      root.querySelectorAll(".suggestion-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const action = chip.getAttribute("data-action");
+          sendChatMessage(chip.textContent.trim(), action);
+        });
+      });
+    }
+
+    bindSuggestionChips();
 
     document.querySelectorAll(".studio-tile").forEach(tile => {
       tile.addEventListener("click", () => {
@@ -2305,12 +3263,17 @@
       renderSources();
     });
 
-    // Image Attachment Handlers
+    // Image Attachment Handlers (Only enabled when active model is multimodal)
     els.chatAttachImgBtn.addEventListener("click", () => {
+      if (!isCurrentModelMultimodal()) return;
       els.chatImgFileInput.click();
     });
 
     els.chatImgFileInput.addEventListener("change", (e) => {
+      if (!isCurrentModelMultimodal()) {
+        clearAttachedImage();
+        return;
+      }
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -2370,10 +3333,16 @@
       for (const f of files) formData.append("files", f);
       const res = await fetch("/api/sources/upload", { method: "POST", body: formData });
       const data = await res.json();
+      if (data.status === "error") {
+        alert(data.message || "Error al subir el archivo.");
+        els.fileUploadInput.value = "";
+        return;
+      }
       state.sources = data.sources;
       data.uploaded.forEach(name => state.selectedSources.add(name));
       renderSources();
       if (els.addSourceModal.open) els.addSourceModal.close();
+      triggerNotebookOverview();
     });
 
     document.getElementById("import-url-source-btn").addEventListener("click", async () => {
@@ -2423,6 +3392,7 @@
         titleEl.value = "";
         contentEl.value = "";
         els.addSourceModal.close();
+        triggerNotebookOverview();
       }
     });
 
@@ -2436,16 +3406,135 @@
     document.getElementById("close-note-modal").addEventListener("click", () => els.noteModal.close());
     document.getElementById("close-research-modal").addEventListener("click", () => els.researchModal.close());
 
+    function switchToNoteEditTab() {
+      if (els.tabNoteEdit && els.tabNotePreview) {
+        els.tabNoteEdit.classList.add("active");
+        els.tabNotePreview.classList.remove("active");
+        els.noteContentInput.style.display = "block";
+        els.notePreviewPane.style.display = "none";
+      }
+    }
+
+    function switchToNotePreviewTab() {
+      if (els.tabNoteEdit && els.tabNotePreview) {
+        els.tabNotePreview.classList.add("active");
+        els.tabNoteEdit.classList.remove("active");
+        els.noteContentInput.style.display = "none";
+        els.notePreviewPane.style.display = "block";
+        const content = els.noteContentInput.value || "*Sin contenido*";
+        els.notePreviewPane.innerHTML = `<div class="msg-content">${renderMarkdownAndCitations(content)}</div>`;
+      }
+    }
+
+    if (els.tabNoteEdit) {
+      els.tabNoteEdit.addEventListener("click", switchToNoteEditTab);
+    }
+    if (els.tabNotePreview) {
+      els.tabNotePreview.addEventListener("click", switchToNotePreviewTab);
+    }
+
     document.getElementById("btn-new-note").addEventListener("click", () => {
+      state.editingNoteId = null;
+      state.editingNoteOriginalTitle = null;
       els.noteTitleInput.value = "";
       els.noteContentInput.value = "";
+      switchToNoteEditTab();
       els.noteModal.showModal();
     });
 
+    if (els.btnSuggestNoteTitle) {
+      els.btnSuggestNoteTitle.addEventListener("click", async () => {
+        const content = els.noteContentInput.value.trim();
+        if (!content) {
+          showToast("Escribe contenido antes de generar título");
+          return;
+        }
+        els.btnSuggestNoteTitle.disabled = true;
+        try {
+          const res = await fetch("/api/notes/generate-title", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: content.slice(0, 800) })
+          });
+          const data = await res.json();
+          if (data && data.title) {
+            els.noteTitleInput.value = data.title;
+            showToast(`✨ Título sugerido: "${data.title}"`);
+          }
+        } finally {
+          els.btnSuggestNoteTitle.disabled = false;
+        }
+      });
+    }
+
     document.getElementById("save-note-confirm").addEventListener("click", async () => {
-      await saveNoteToServer(els.noteTitleInput.value || "Nota_Cuaderno", els.noteContentInput.value);
+      const title = els.noteTitleInput.value.trim() || "Nota sin título";
+      const content = els.noteContentInput.value;
+      await saveNoteToServer(title, content, state.editingNoteId);
       els.noteModal.close();
+      showToast(`💾 Nota guardada: "${title}"`);
     });
+
+    if (els.btnNewNotebook) {
+      els.btnNewNotebook.addEventListener("click", async () => {
+        const ok = await showConfirmModal(
+          "¿Crear un nuevo cuaderno?",
+          "Esto iniciará un nuevo cuaderno limpio: se vaciarán las fuentes activas, la conversación y el panel de notas para tu nueva investigación.",
+          "Crear nuevo cuaderno",
+          "Cancelar"
+        );
+        if (!ok) return;
+
+        const res = await fetch("/api/notebook/new", { method: "POST" });
+        const data = await res.json();
+        state.sources = data.sources || [];
+        state.notes = data.notes || [];
+        state.selectedSources = new Set();
+        state.chatHistory = [];
+        els.chatStream.innerHTML = initialOverviewHTML;
+        bindSuggestionChips(els.chatStream);
+        els.notebookTitleInput.value = "Cuaderno sin título";
+        renderSources();
+        renderNotes();
+        updateContextMeterUI();
+        showToast("✨ Nuevo cuaderno iniciado con notas limpias");
+      });
+    }
+
+    async function triggerNotebookOverview() {
+      if (state.selectedSources.size === 0) return;
+      const ovDesc = document.querySelector("#overview-banner .overview-desc");
+      const ovTitle = document.querySelector("#overview-banner .overview-title span:last-child");
+      const prevDesc = ovDesc ? ovDesc.innerHTML : "";
+      
+      if (ovDesc) {
+        ovDesc.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px; color:var(--text-secondary);"><span class="thinking-spinner" style="inline-size:16px; block-size:16px; border-width:2px;"></span> <em>Analizando fuentes para generar la guía y el título del cuaderno...</em></span>`;
+      }
+      if (els.notebookTitleInput && (!els.notebookTitleInput.value || els.notebookTitleInput.value === "Cuaderno sin título" || els.notebookTitleInput.value === "Cuaderno de Investigación Local")) {
+        els.notebookTitleInput.style.opacity = "0.6";
+      }
+
+      try {
+        const res = await fetch("/api/notebook/overview", { method: "POST" });
+        const data = await res.json();
+        if (data && data.status === "ok") {
+          if (data.title && els.notebookTitleInput) {
+            els.notebookTitleInput.value = data.title;
+          }
+          if (ovDesc && data.overview) {
+            ovDesc.textContent = data.overview;
+          }
+        } else if (ovDesc) {
+          ovDesc.innerHTML = prevDesc;
+        }
+      } catch (_) {
+        if (ovDesc) ovDesc.innerHTML = prevDesc;
+      } finally {
+        if (els.notebookTitleInput) {
+          els.notebookTitleInput.style.opacity = "1";
+        }
+      }
+    }
 
     document.getElementById("btn-open-research").addEventListener("click", () => {
       els.researchModal.showModal();
@@ -2483,9 +3572,98 @@
       els.researchModal.close();
     });
 
+    const initialOverviewHTML = els.chatStream ? els.chatStream.innerHTML : "";
+
+    // Selection to Note (NotebookLM Feature)
+    let activeSelectedText = "";
+
+    document.addEventListener("selectionchange", () => {
+      const selection = window.getSelection();
+      const text = selection ? selection.toString().trim() : "";
+      if (!text || text.length < 5) {
+        if (els.selectionActionPill) els.selectionActionPill.style.display = "none";
+        activeSelectedText = "";
+        return;
+      }
+
+      // Check if selection is within chatStream or a modal body
+      const range = selection.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      const insideChatOrModal = container.nodeType === Node.ELEMENT_NODE
+        ? (container.closest("#chat-stream") || container.closest(".modal-body") || container.closest(".source-modal-body"))
+        : (container.parentElement && (container.parentElement.closest("#chat-stream") || container.parentElement.closest(".modal-body") || container.parentElement.closest(".source-modal-body")));
+
+      if (!insideChatOrModal) {
+        if (els.selectionActionPill) els.selectionActionPill.style.display = "none";
+        activeSelectedText = "";
+        return;
+      }
+
+      activeSelectedText = text;
+      const rect = range.getBoundingClientRect();
+      if (els.selectionActionPill && rect.width > 0) {
+        els.selectionActionPill.style.display = "inline-flex";
+        els.selectionActionPill.style.top = `${window.scrollY + rect.bottom + 8}px`;
+        els.selectionActionPill.style.left = `${window.scrollX + Math.max(16, rect.left + (rect.width / 2) - 90)}px`;
+      }
+    });
+
+    if (els.selectionActionPill) {
+      els.selectionActionPill.addEventListener("mousedown", (e) => {
+        // Prevent clearing selection on click
+        e.preventDefault();
+      });
+
+      els.selectionActionPill.addEventListener("click", async () => {
+        if (!activeSelectedText) return;
+        const textToSave = activeSelectedText;
+        els.selectionActionPill.style.display = "none";
+        window.getSelection()?.removeAllRanges();
+
+        // Open Note Modal pre-filled
+        state.editingNoteId = null;
+        state.editingNoteOriginalTitle = null;
+        els.noteContentInput.value = textToSave;
+        switchToNoteEditTab();
+
+        // Infer concise title from the selected text
+        try {
+          const res = await fetch("/api/notes/generate-title", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: textToSave.slice(0, 800) })
+          });
+          const data = await res.json();
+          els.noteTitleInput.value = (data && data.title) ? data.title : "Cita seleccionada";
+        } catch (_) {
+          els.noteTitleInput.value = "Cita seleccionada";
+        }
+
+        els.noteModal.showModal();
+        showToast("📝 Texto seleccionado cargado en el editor de notas");
+      });
+    }
+
     document.getElementById("btn-clear-chat").addEventListener("click", () => {
       state.chatHistory = [];
-      els.chatStream.innerHTML = "";
+      els.chatStream.innerHTML = initialOverviewHTML;
+      bindSuggestionChips(els.chatStream);
+      updateContextMeterUI(els.chatInput.value);
+      showToast("✨ Charla reiniciada");
+    });
+
+    // Mobile / Tablet Tab Bar Handling
+    document.querySelectorAll(".mobile-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".mobile-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const targetId = btn.getAttribute("data-panel-target");
+        document.querySelectorAll(".workspace-grid > .panel").forEach(p => p.classList.remove("mobile-active"));
+        const targetPanel = document.getElementById(targetId);
+        if (targetPanel) {
+          targetPanel.classList.add("mobile-active");
+        }
+      });
     });
 
     loadInitialData();

@@ -132,9 +132,10 @@ class ArchiveMemory:
             )
             results: List[Tuple[DocumentChunk, float]] = []
             for row in cur.fetchall():
+                raw_content = "".join(ch for ch in (row[1] or "") if ch == "\n" or ch == "\t" or ord(ch) >= 32)
                 chunk = DocumentChunk(
                     source_file=row[0],
-                    content=row[1],
+                    content=raw_content,
                     page_number=row[2],
                     section_title=row[3],
                 )

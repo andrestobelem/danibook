@@ -1,4 +1,4 @@
-# Investigación: Arquitectura Local tipo NotebookLM con Gemma 4 & Hugging Face (`danibook`)
+# Investigación: Arquitectura Local tipo NotebookLM con Gemma 4 & Hugging Face (`DaniBookLM`)
 
 **Fecha**: 2026-11-03  
 **Contexto**: Diseño de una alternativa local, rápida e incremental a NotebookLM para **Daniel Kusnir** (escritura de su libro).
@@ -68,9 +68,13 @@ Si en algún momento suma decenas de libros de referencia además de sus borrado
 
 ---
 
-## 5. Preguntas Clave para Definir la Arquitectura Exacta
+## 5. Estado de Implementación y Hallazgos Empíricos (Consolidación)
 
-Para elegir el stack exacto sin sobre-ingeniería:
-1. **¿Qué computadora usa Daniel?** (¿Mac con chip M1/M2/M3/M4, PC con Windows/Linux, cuánta RAM tiene y si tiene placa de video NVIDIA?).
-2. **¿Qué formato tienen los archivos que va agregando?** (¿Archivos Word `.docx`, PDFs de investigación, archivos de texto/Markdown, notas de audio?).
-3. **¿Qué volumen aproximado maneja?** (¿Solo los capítulos de su libro —que entran enteros en la ventana de 128K de Gemma 4 E4B sin siquiera necesitar RAG—, o también decenas de PDFs pesados de bibliografía?).
+1. **Interfaz y Design System**:
+   - Se descartó Gradio en favor de una interfaz web Material Design 3 pura (`src/danibook/ui/notebooklm.html`) con Web Components oficiales de Google (`@material/web` v2.5.0 compilado con Bun en `vendor/material-web.min.js`) y selector de tema de 3 estados (`System` por defecto, `Light`, `Dark`).
+   - El panel de **Studio** ofrece 4 **Studio Artifacts**: *Guía de Estudio* (`summary`), *Mapa Conceptual / Glosario y relaciones* (`glossary`), *Cronología* (`timeline`) y *Citas Textuales* (`quotes`).
+2. **Memoria de Dos Niveles y Sanitización OCR**:
+   - **Desk (Tier 1 — `tier1_desk.py`)**: Presupuesto dinámico acotado (`max_chars=16000`) que evita desbordar la ventana de 32K tokens incluso con 36+ libros seleccionados simultáneamente.
+   - **Archive (Tier 2 — `tier2_archive.py`)**: Persistido en SQLite FTS5 (`data/cache/archive_fts5.sqlite`) con ranking BM25 nativo, caché de arranque instantáneo por hash `SHA-256` y filtrado de caracteres de control OCR (`ord(ch) < 32`) que de otro modo disparan aserciones en el tokenizador C++ de `llama.cpp`.
+3. **Ciclo de Vida del Modelo y Concurrencia**:
+   - `LLMEngine` (`src/danibook/llm/engine.py`) serializa las llamadas nativas a Metal mediante `threading.Lock()`, libera explícitamente la VRAM (`unload_active_model()`) antes de cargar otro modelo, permite borrar pesos `.gguf` del disco y transmite el progreso de descarga desde Hugging Face en tiempo real (`/api/models/progress`).

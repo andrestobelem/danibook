@@ -8,5 +8,8 @@ def test_build_chat_prompt():
     prompt = build_chat_prompt(desk, ref, query, action_type="contradictions")
     assert "MESA DE TRABAJO: Capítulo 1" in prompt
     assert "[Investigacion.pdf, Pág 5]" in prompt
-    assert "TAREA ESPECIAL: Analiza minuciosamente" in prompt
+    assert "SPECIAL TASK: Carefully analyze" in prompt
     assert "¿Quién es el personaje?" in prompt
+
+    glossary_prompt = build_chat_prompt(desk, ref, "Armar glosario", action_type="glossary")
+    assert "Build a conceptual map and glossary" in glossary_prompt

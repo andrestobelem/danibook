@@ -1,4 +1,4 @@
-# Danibook
+# DaniBookLM
 
 Local, privacy-first research and book-drafting environment modeled on NotebookLM, combining active workspace memory with full-text archive retrieval.
 
@@ -47,8 +47,12 @@ The synthesis workspace where the author transforms Desk and Archive knowledge i
 _Avoid_: Right panel, tools sidebar, export menu
 
 **Studio Artifact (Artefacto de Studio)**:
-A structured analytical synthesis generated from active Sources—specifically a Study Guide, Contradiction Audit, Timeline, or Key Quotes compilation.
-_Avoid_: Report, summary, quick action, output
+A structured analytical synthesis generated from active Sources—specifically a Study Guide, Concept Map / Glossary, Timeline, or Key Quotes compilation.
+_Avoid_: Report, summary, quick action, output, audit
+
+**Concept Map / Glossary (Mapa Conceptual / Glosario)**:
+A Studio Artifact that extracts the core concepts across active Sources, defines each term, and maps theoretical relationships and tensions between authors or chapters with exact Citations.
+_Avoid_: Dictionary, index, gap audit, word list
 
 **Note (Nota)**:
 A mutable piece of authorial writing or pinned synthesis saved permanently within the Studio.
