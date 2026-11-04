@@ -88,6 +88,8 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     @api.get("/api/state")
     async def get_state():
         return {
+            "notebook_id": service.notebook_id,
+            "notebook_title": service.notebook_title,
             "sources": service.get_sources_list(),
             "selected": service.desk.get_active_files(),
             "notes": service.get_notes_list(),

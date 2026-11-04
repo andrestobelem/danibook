@@ -182,10 +182,71 @@ def test_notebook_entity_isolation(tmp_path: Path):
     assert nb1.notes_dir.exists()
     assert "cuaderno-1" in str(nb1.workspace_dir)
     assert "cuaderno-1" in str(nb1.notes_dir)
+    assert nb1.meta_file.exists()
+    assert nb1.to_dict()["id"] == "cuaderno-1"
 
     nb2 = Notebook(id="cuaderno-2", title="Biología Molecular", base_dir=tmp_path)
     nb2.ensure_directories()
     assert nb2.workspace_dir != nb1.workspace_dir
     assert nb2.notes_dir != nb1.notes_dir
+
+
+def test_studio_synthesizer_budget_and_prompt(tmp_path: Path):
+    from danibook.domain.synthesizer import StudioSynthesizer
+    from danibook.memory.tier1_desk import DeskMemory
+    from danibook.memory.tier2_archive import ArchiveMemory
+    from danibook.ingestion.parser import DocumentParser
+
+    desk = DeskMemory()
+    archive = ArchiveMemory(db_path=tmp_path / "archive_synth.sqlite")
+
+    f = tmp_path / "fuente.md"
+    f.write_text("# Sección A\nInformación clave sobre computación cuántica.", encoding="utf-8")
+    parsed = DocumentParser.parse(f)
+    desk.add_document(parsed)
+    archive.add_document(parsed)
+
+    desk_budget, archive_budget = StudioSynthesizer.calculate_budgets(8192)
+    assert desk_budget > 0
+    assert archive_budget == 900
+
+    sys_prompt, user_prompt, active_images = StudioSynthesizer.assemble_prompt(
+        desk=desk,
+        archive=archive,
+        message="¿Qué dice la Sección A?",
+        action_type="chat",
+        context_length=8192,
+    )
+    assert "Información clave sobre computación cuántica." in sys_prompt
+    assert "¿Qué dice la Sección A?" in user_prompt
+    assert isinstance(active_images, list)
+
+
+def test_notebook_service_switch_notebook(tmp_path: Path):
+    from danibook.domain.notebook_entity import Notebook
+    ws = tmp_path / "ws_default"
+    notes = tmp_path / "notes_default"
+    service = NotebookService(
+        workspace_dir=ws,
+        notes_dir=notes,
+        collections_dir=tmp_path / "cols",
+        samples_dir=tmp_path / "samples",
+        engine=LLMEngine(use_mock=True),
+        archive=ArchiveMemory(db_path=tmp_path / "archive.sqlite"),
+    )
+    service.save_note("Nota General", "Contenido general.")
+    assert len(service.get_notes_list()) == 1
+
+    # Switch to isolated notebook
+    nb_custom = Notebook(id="cuaderno-nuevo", title="Proyecto Alpha", base_dir=tmp_path)
+    service.switch_notebook(nb_custom)
+    assert service.notebook_id == "cuaderno-nuevo"
+    assert service.notebook_title == "Proyecto Alpha"
+    assert len(service.get_notes_list()) == 0
+
+    # Save note in new notebook
+    service.save_note("Nota Alpha", "Contenido del proyecto alpha.")
+    assert len(service.get_notes_list()) == 1
+    assert service.get_notes_list()[0]["title"] == "Nota Alpha"
 
 

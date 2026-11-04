@@ -10,9 +10,10 @@ from ..ingestion.researcher import DeepResearcher
 from ..memory.tier1_desk import DeskMemory
 from ..memory.tier2_archive import ArchiveMemory
 from ..llm.engine import LLMEngine
-from ..llm.prompts import SYSTEM_AUTHOR_PROMPT, build_chat_prompt
 from .studio import StudioStore
 from .catalog import CatalogRepository
+from .notebook_entity import Notebook
+from .synthesizer import StudioSynthesizer
 
 
 class NotebookService:
@@ -27,7 +28,13 @@ class NotebookService:
         engine: Optional[LLMEngine] = None,
         desk: Optional[DeskMemory] = None,
         archive: Optional[ArchiveMemory] = None,
+        active_notebook: Optional[Notebook] = None,
     ):
+        self.active_notebook = active_notebook or Notebook(
+            id="default",
+            title="Cuaderno Principal",
+        )
+        # If default dirs are passed, bind them to workspace_dir and notes_dir
         self.workspace_dir = Path(workspace_dir).resolve()
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
         self.watcher = FolderWatcher(self.workspace_dir)
@@ -42,6 +49,25 @@ class NotebookService:
             model_id=DEFAULT_MODEL_ID,
         )
         self.sources: Dict[str, ParsedDocument] = {}
+        self.initial_sync()
+
+    @property
+    def notebook_id(self) -> str:
+        return self.active_notebook.id
+
+    @property
+    def notebook_title(self) -> str:
+        return self.active_notebook.title
+
+    def switch_notebook(self, notebook: Notebook) -> None:
+        """Switches the active Notebook aggregate, updating workspace and notes paths."""
+        self.active_notebook = notebook
+        self.active_notebook.ensure_directories()
+        self.workspace_dir = self.active_notebook.workspace_dir
+        self.watcher = FolderWatcher(self.workspace_dir)
+        self.studio.set_notes_dir(self.active_notebook.notes_dir)
+        self.desk.clear()
+        self.sources.clear()
         self.initial_sync()
 
     @property
@@ -268,27 +294,13 @@ class NotebookService:
             self.sync_selected(selected)
 
         ctx_len = self.engine.preset.context_length
-        # Reserve tokens for output generation (2048), multimodal CLIP embeddings (~1500), history, and Archive RAG
-        desk_char_budget = max(2500, min(14000, int((ctx_len - 5000) * 1.5)))
-        archive_chunk_budget = 900 if ctx_len <= 8192 else 2200
-
-        desk_prefix = self.desk.build_desk_prefix(max_chars=desk_char_budget)
-        active_images = self.desk.get_active_image_uris(max_images=2)
-        if image_uri and image_uri not in active_images:
-            active_images.insert(0, image_uri)
-        reference_context = self.archive.format_search_context(
-            message, top_k=3, max_chunk_chars=archive_chunk_budget
-        )
-
-        base_system_context = SYSTEM_AUTHOR_PROMPT
-        if desk_prefix:
-            base_system_context += f"\n\n{desk_prefix}"
-
-        current_turn_prompt = build_chat_prompt(
-            desk_prefix="",
-            reference_context=reference_context,
-            user_query=message,
+        base_system_context, current_turn_prompt, active_images = StudioSynthesizer.assemble_prompt(
+            desk=self.desk,
+            archive=self.archive,
+            message=message,
             action_type=action_type,
+            context_length=ctx_len,
+            image_uri=image_uri,
         )
 
         return self.engine.generate_chat_stream(
