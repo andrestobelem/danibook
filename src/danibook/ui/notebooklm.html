@@ -161,20 +161,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
-      block-size: 60px;
+      padding: 8px 18px;
+      min-block-size: 56px;
       flex-shrink: 0;
+      gap: 12px;
+      max-inline-size: 100vw;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 1;
+      min-inline-size: 0;
     }
 
     .brand-logo {
-      inline-size: 38px;
-      block-size: 38px;
+      inline-size: 36px;
+      block-size: 36px;
       border-radius: 12px;
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -186,22 +190,25 @@
     }
 
     .brand-logo svg {
-      inline-size: 24px;
-      block-size: 24px;
+      inline-size: 22px;
+      block-size: 22px;
     }
 
     .notebook-title {
-      font-size: 0.98rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: var(--text-primary);
       background: transparent;
       border: 1px solid transparent;
-      padding: 6px 10px;
-      border-radius: 10px;
+      padding: 5px 8px;
+      border-radius: 8px;
       field-sizing: content;
-      min-inline-size: 180px;
-      max-inline-size: 320px;
+      min-inline-size: 110px;
+      max-inline-size: 220px;
       font-family: inherit;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .notebook-title:hover,
@@ -214,18 +221,21 @@
     .header-meta {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .model-selector-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       background: var(--bg-panel);
       border: 1px solid var(--border-subtle);
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: var(--radius-pill);
       box-shadow: var(--shadow-panel);
+      max-inline-size: 260px;
+      min-inline-size: 0;
     }
 
     .status-dot {
@@ -251,13 +261,15 @@
       color: var(--text-primary);
       border: none;
       font-family: inherit;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       cursor: pointer;
       outline: none;
-      padding-inline-end: 4px;
-      max-inline-size: 360px;
+      padding-inline-end: 2px;
+      max-inline-size: 180px;
       text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .theme-toggle-btn {
@@ -1556,24 +1568,28 @@
     /* Responsive collapses gracefully */
     @media (max-width: 1200px) {
       .workspace-grid {
-        grid-template-columns: minmax(250px, 280px) minmax(0, 1fr) minmax(260px, 300px);
+        grid-template-columns: minmax(230px, 260px) minmax(0, 1fr) minmax(240px, 280px);
         gap: 10px;
-        padding: 0 12px 12px 12px;
+        padding: 0 10px 10px 10px;
       }
       .notebook-title {
-        min-inline-size: 130px;
-        max-inline-size: 200px;
+        min-inline-size: 80px;
+        max-inline-size: 150px;
       }
       .model-select {
-        max-inline-size: 220px;
+        max-inline-size: 150px;
+      }
+      .context-meter-pill {
+        padding: 4px 8px;
+        font-size: 0.72rem;
       }
     }
 
     @media (max-width: 960px) {
       .top-bar {
-        padding: 8px 14px;
+        padding: 8px 12px;
         block-size: auto;
-        min-block-size: 56px;
+        min-block-size: 52px;
         flex-wrap: wrap;
         gap: 8px;
       }
