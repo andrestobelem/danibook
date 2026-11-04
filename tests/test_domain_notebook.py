@@ -174,3 +174,18 @@ def test_never_exceeds_context_window():
         assert headroom_after["needs_auto_compaction"] is False
 
 
+def test_notebook_entity_isolation(tmp_path: Path):
+    from danibook.domain.notebook_entity import Notebook
+    nb1 = Notebook(id="cuaderno-1", title="Investigación Quantum", base_dir=tmp_path)
+    nb1.ensure_directories()
+    assert nb1.workspace_dir.exists()
+    assert nb1.notes_dir.exists()
+    assert "cuaderno-1" in str(nb1.workspace_dir)
+    assert "cuaderno-1" in str(nb1.notes_dir)
+
+    nb2 = Notebook(id="cuaderno-2", title="Biología Molecular", base_dir=tmp_path)
+    nb2.ensure_directories()
+    assert nb2.workspace_dir != nb1.workspace_dir
+    assert nb2.notes_dir != nb1.notes_dir
+
+
