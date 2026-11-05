@@ -164,14 +164,14 @@ class LLMEngine:
             safe_max_tokens = min(2048, max(512, n_ctx // 4))
 
             # Auto-compact conversation turns if free context ratio drops below 10%
-            compacted_history, user_prompt = self.context_mgr.auto_compact_when_low(
-                history=history,
+            safe_system, user_prompt, compacted_history, _ = self.context_mgr.auto_compact_when_low(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
+                history=history,
+                image_uris=image_uris,
                 n_ctx=n_ctx,
+                max_tokens=safe_max_tokens,
                 min_free_ratio=0.10,
-                reserved_output_tokens=safe_max_tokens,
-                reserved_vision_tokens=reserved_vision_tokens,
             )
 
             # Cap total history
