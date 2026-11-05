@@ -13,3 +13,10 @@ def test_build_chat_prompt():
 
     glossary_prompt = build_chat_prompt(desk, ref, "Armar glosario", action_type="glossary")
     assert "Build a conceptual map and glossary" in glossary_prompt
+
+    mindmap_prompt = build_chat_prompt(desk, ref, "Create mindmap", action_type="mindmap")
+    assert "SPECIAL TASK: Create a visual, structured Concept & Entity Map" in mindmap_prompt
+    assert "mermaid" in mindmap_prompt
+
+    flashcards_prompt = build_chat_prompt(desk, ref, "Generate flashcards", action_type="flashcards")
+    assert "SPECIAL TASK: Generate a set of 5 to 8 high-impact study flashcards" in flashcards_prompt

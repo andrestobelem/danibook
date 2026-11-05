@@ -75,6 +75,22 @@ def build_chat_prompt(
             "Identify key concepts, give precise definitions, and explain relationships or theoretical tensions between authors or chapters, "
             "supporting each term with an exact citation."
         )
+    elif action_type == "mindmap":
+        instructions = (
+            "SPECIAL TASK: Create a visual, structured Concept & Entity Map based on the active sources. "
+            "Structure your answer with:\n"
+            "1. An interactive Mermaid diagram inside a ```mermaid code block (use 'graph LR' or 'graph TD', connecting main concepts with labeled relationships like A[\"Concept A\"] -->|\"relates to\"| B[\"Concept B\"]).\n"
+            "2. A concise breakdown of the primary hubs, clusters, and bridges identified across the documents, citing each source in square brackets."
+        )
+    elif action_type == "flashcards":
+        instructions = (
+            "SPECIAL TASK: Generate a set of 5 to 8 high-impact study flashcards and quiz questions from the active sources. "
+            "For each card, format strictly as:\n"
+            "### Card [N]: [Topic / Question]\n"
+            "- **Front / Question**: [Clear inquiry or concept prompt]\n"
+            "- **Back / Answer**: [Concise, accurate explanation with inline citation]\n"
+            "- **Key Takeaway**: [One actionable sentence]"
+        )
 
     context_blocks = []
     if desk_prefix:

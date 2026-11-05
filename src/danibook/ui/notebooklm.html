@@ -15,6 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
   <script src="/vendor/marked.min.js"></script>
   <script src="/vendor/purify.min.js"></script>
+  <script src="/vendor/mermaid.min.js"></script>
   <script type="module" src="/vendor/material-web.min.js"></script>
   <style>
     :root {
@@ -809,6 +810,87 @@
       padding: 0;
       color: inherit;
       font-weight: normal;
+    }
+
+    /* Mermaid Visual Mind Map Container */
+    .mermaid-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-block: 14px;
+      overflow-x: auto;
+      text-align: center;
+      box-shadow: var(--shadow-panel);
+    }
+
+    .mermaid-container svg {
+      max-inline-size: 100%;
+      height: auto;
+      display: inline-block;
+    }
+
+    /* Interactive Study Flashcards Container */
+    .flashcard-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-block: 14px;
+    }
+
+    .flashcard-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+      box-shadow: var(--shadow-panel);
+    }
+
+    .flashcard-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .flashcard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-block-end: 6px;
+    }
+
+    .flashcard-question {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-block-end: 8px;
+    }
+
+    .flashcard-answer {
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      padding-block-start: 8px;
+      border-block-start: 1px dashed var(--border-subtle);
+      display: none;
+    }
+
+    .flashcard-item.revealed .flashcard-answer {
+      display: block;
+    }
+
+    .flashcard-toggle-pill {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-weight: 600;
     }
 
     .msg-content table {
@@ -1919,7 +2001,11 @@
       <input type="text" id="notebook-title-input" class="notebook-title" value="Local Research Notebook" aria-label="Notebook Title" />
       <button type="button" id="btn-new-notebook" class="btn-mini" title="Create a new clean notebook" aria-label="New Notebook">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; color:var(--accent);">add</span>
-        <span>New notebook</span>
+        <span>New</span>
+      </button>
+      <button type="button" id="btn-export-notebook" class="btn-mini" style="padding:4px 10px; display:inline-flex; align-items:center; gap:4px; font-weight:600;" title="Export notebook report (Markdown / Printable PDF)" aria-label="Export Notebook">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; color:var(--accent);">ios_share</span>
+        <span>Export</span>
       </button>
     </div>
     <div class="header-meta">
@@ -2140,10 +2226,20 @@
             <span class="tile-label">Study Guide</span>
             <span class="tile-sub">Thematic summary</span>
           </button>
+          <button type="button" class="studio-tile" data-studio="mindmap">
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">account_tree</span>
+            <span class="tile-label">Visual Mind Map</span>
+            <span class="tile-sub">Mermaid entity graph</span>
+          </button>
+          <button type="button" class="studio-tile" data-studio="flashcards">
+            <span class="material-symbols-outlined tile-icon" aria-hidden="true">style</span>
+            <span class="tile-label">Flashcards & Quiz</span>
+            <span class="tile-sub">Interactive cards</span>
+          </button>
           <button type="button" class="studio-tile" data-studio="glossary">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">hub</span>
-            <span class="tile-label">Concept Map</span>
-            <span class="tile-sub">Glossary & relations</span>
+            <span class="tile-label">Concept Glossary</span>
+            <span class="tile-sub">Terms & relations</span>
           </button>
           <button type="button" class="studio-tile" data-studio="timeline">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">schedule</span>
@@ -2349,7 +2445,53 @@
     </div>
   </dialog>
 
-  <!-- Models Disk & Memory Manager Modal -->
+  <!-- Export Notebook Report Modal -->
+  <dialog id="export-notebook-modal" class="nb-modal" closedby="any" aria-labelledby="export-modal-title" style="max-inline-size: 640px;">
+    <div class="modal-header">
+      <h3 id="export-modal-title" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined" style="color:var(--accent);">ios_share</span>
+        <span>Export Notebook Report</span>
+      </h3>
+      <button type="button" class="btn-mini" id="close-export-modal">✕ Close</button>
+    </div>
+    <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:14px;">
+      Compile your active notebook (sources metadata, desk overview, notes, and chat synthesis) into a publication-ready document.
+    </p>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-block-end:16px;">
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; cursor:pointer;">
+        <input type="checkbox" id="export-opt-overview" checked />
+        <span>Include Notebook Title & Desk Overview</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; cursor:pointer;">
+        <input type="checkbox" id="export-opt-sources" checked />
+        <span>Include Active Sources list & file references</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; cursor:pointer;">
+        <input type="checkbox" id="export-opt-notes" checked />
+        <span>Include Saved Studio Notes</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; cursor:pointer;">
+        <input type="checkbox" id="export-opt-chat" checked />
+        <span>Include Chat Conversation & Studio Artifacts</span>
+      </label>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; border-block-start:1px solid var(--border-subtle); padding-block-start:12px;">
+      <button type="button" class="btn btn-secondary" id="btn-export-copy-markdown">
+        <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
+        <span>Copy Markdown</span>
+      </button>
+      <button type="button" class="btn btn-primary" id="btn-export-download-md">
+        <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+        <span>Download .md</span>
+      </button>
+      <button type="button" class="btn btn-primary" id="btn-export-print-pdf" style="background:#1e8e3e; border-color:#1e8e3e;">
+        <span class="material-symbols-outlined" style="font-size:16px;">print</span>
+        <span>Print / Save as PDF</span>
+      </button>
+    </div>
+  </dialog>
   <dialog id="models-manager-modal" class="nb-modal" closedby="any" aria-labelledby="models-manager-title" style="max-inline-size: 680px;">
     <div class="modal-header">
       <h3 id="models-manager-title" style="display:flex; align-items:center; gap:8px;">
@@ -3114,7 +3256,167 @@
               state.sources = data.sources;
               data.imported.forEach(f => state.selectedSources.add(f));
               renderSources();
-              loadInitialData();
+              // Export Notebook Report (Markdown / Printable PDF)
+    const exportModal = document.getElementById("export-notebook-modal");
+    const btnExportNotebook = document.getElementById("btn-export-notebook");
+    const closeExportModal = document.getElementById("close-export-modal");
+    const btnExportCopyMarkdown = document.getElementById("btn-export-copy-markdown");
+    const btnExportDownloadMd = document.getElementById("btn-export-download-md");
+    const btnExportPrintPdf = document.getElementById("btn-export-print-pdf");
+
+    if (btnExportNotebook && exportModal) {
+      btnExportNotebook.addEventListener("click", () => {
+        exportModal.showModal();
+      });
+    }
+
+    if (closeExportModal && exportModal) {
+      closeExportModal.addEventListener("click", () => exportModal.close());
+    }
+
+    function generateCompiledNotebookMarkdown() {
+      const incOverview = document.getElementById("export-opt-overview")?.checked ?? true;
+      const incSources = document.getElementById("export-opt-sources")?.checked ?? true;
+      const incNotes = document.getElementById("export-opt-notes")?.checked ?? true;
+      const incChat = document.getElementById("export-opt-chat")?.checked ?? true;
+
+      const title = els.notebookTitleInput?.value?.trim() || "Research Notebook";
+      const timestamp = new Date().toLocaleString();
+      let md = `# ${title}\n*Generated by DaniBookLM — ${timestamp}*\n\n`;
+
+      if (incOverview) {
+        const ovDesc = document.querySelector("#overview-banner .overview-desc")?.textContent?.trim();
+        if (ovDesc) {
+          md += `## Notebook Overview & Study Guide\n${ovDesc}\n\n`;
+        }
+      }
+
+      if (incSources) {
+        md += `## Active Sources (${state.selectedSources.size})\n`;
+        if (state.selectedSources.size === 0) {
+          md += `*No sources were selected.*\n\n`;
+        } else {
+          Array.from(state.selectedSources).forEach(sName => {
+            const sObj = state.sources.find(s => s.name === sName);
+            const chars = sObj ? sObj.size_chars : 0;
+            const chunks = sObj ? sObj.chunks_count : 0;
+            md += `- **${sName}** (${chunks} chunks • ~${Math.round(chars / 1000)}k chars)\n`;
+          });
+          md += `\n`;
+        }
+      }
+
+      if (incNotes) {
+        md += `## Saved Studio Notes (${state.notes.length})\n`;
+        if (state.notes.length === 0) {
+          md += `*No notes saved.*\n\n`;
+        } else {
+          state.notes.forEach((n, idx) => {
+            md += `### ${idx + 1}. ${n.title}\n\n${n.content}\n\n`;
+          });
+        }
+      }
+
+      if (incChat && state.chatHistory.length > 0) {
+        md += `## Synthesis & Chat Sessions\n`;
+        state.chatHistory.forEach(turn => {
+          const role = turn.role === "user" ? "👤 User Query" : "🤖 DaniBookLM Assistant";
+          md += `### ${role}\n${turn.content}\n\n`;
+        });
+      }
+
+      return md;
+    }
+
+    if (btnExportCopyMarkdown) {
+      btnExportCopyMarkdown.addEventListener("click", async () => {
+        const md = generateCompiledNotebookMarkdown();
+        try {
+          await navigator.clipboard.writeText(md);
+          showToast("📋 Markdown report copied to clipboard!");
+          exportModal.close();
+        } catch (e) {
+          showToast("⚠️ Could not copy: " + e.message);
+        }
+      });
+    }
+
+    if (btnExportDownloadMd) {
+      btnExportDownloadMd.addEventListener("click", () => {
+        const md = generateCompiledNotebookMarkdown();
+        const title = (els.notebookTitleInput?.value?.trim() || "Notebook").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title}_report.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("📥 Markdown report downloaded");
+        exportModal.close();
+      });
+    }
+
+    if (btnExportPrintPdf) {
+      btnExportPrintPdf.addEventListener("click", () => {
+        const md = generateCompiledNotebookMarkdown();
+        const title = els.notebookTitleInput?.value?.trim() || "Research Notebook";
+        const htmlBody = marked.parse(md);
+
+        const printWin = window.open("", "_blank");
+        if (!printWin) {
+          alert("Please allow popups to generate the printable PDF report.");
+          return;
+        }
+
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>${title} — DaniBookLM</title>
+            <style>
+              body {
+                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                color: #1f1f1f;
+                background: #ffffff;
+                padding: 40px;
+                max-width: 820px;
+                margin: 0 auto;
+                line-height: 1.6;
+              }
+              h1 { font-size: 2rem; border-bottom: 2px solid #0b57d0; padding-bottom: 8px; color: #0b57d0; }
+              h2 { font-size: 1.3rem; margin-top: 28px; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; color: #1f1f1f; }
+              h3 { font-size: 1.05rem; margin-top: 18px; color: #333; }
+              pre { background: #f0f4f9; padding: 14px; border-radius: 8px; overflow-x: auto; font-family: monospace; }
+              blockquote { border-left: 3px solid #0b57d0; margin: 0; padding-left: 14px; color: #555; font-style: italic; }
+              table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+              th { background: #f0f4f9; }
+              .citation-badge { background: #d3e3fd; color: #041e49; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.8em; }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlBody}
+            <script>
+              window.onload = function() {
+                window.print();
+              };
+            <\/script>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
+        exportModal.close();
+      });
+    }
+
+    loadInitialData();
               els.collectionsModal.close();
               triggerNotebookOverview();
             }
@@ -3299,6 +3601,8 @@
       return { markdown: raw, suggestions: [] };
     }
 
+    let mermaidCounter = 0;
+
     function renderMarkdownAndCitations(raw) {
       if (!raw) return "";
       const { markdown } = parseResponseAndSuggestions(raw);
@@ -3308,6 +3612,83 @@
         return `<span class="citation-badge" data-cite="${inner}">📎 ${inner}</span>`;
       });
       return html;
+    }
+
+    async function enhanceRenderedArtifacts(container) {
+      if (!container) return;
+
+      // 1. Process Mermaid Diagrams
+      if (window.mermaid) {
+        const mermaidPreList = container.querySelectorAll("pre > code.language-mermaid");
+        for (const codeEl of mermaidPreList) {
+          const preEl = codeEl.closest("pre");
+          if (!preEl || preEl.dataset.mermaidRendered) continue;
+          preEl.dataset.mermaidRendered = "true";
+          const rawCode = codeEl.textContent.trim();
+          const graphId = `mermaid-graph-${++mermaidCounter}`;
+          try {
+            const { svg } = await mermaid.render(graphId, rawCode);
+            const wrapper = document.createElement("div");
+            wrapper.className = "mermaid-container";
+            wrapper.innerHTML = svg;
+            preEl.replaceWith(wrapper);
+          } catch (mErr) {
+            console.warn("Mermaid render error:", mErr);
+          }
+        }
+      }
+
+      // 2. Enhance Flashcards & Quiz elements
+      const flashcardHeaders = container.querySelectorAll("h3");
+      flashcardHeaders.forEach(h3 => {
+        if (/Card\s*\d+/i.test(h3.textContent) && !h3.dataset.cardEnhanced) {
+          h3.dataset.cardEnhanced = "true";
+          // Check if following element is a list
+          const nextEl = h3.nextElementSibling;
+          if (nextEl && nextEl.tagName === "UL") {
+            const items = Array.from(nextEl.querySelectorAll("li"));
+            let frontText = "";
+            let backText = "";
+            let takeaway = "";
+
+            items.forEach(li => {
+              const txt = li.innerHTML;
+              if (txt.includes("Front") || txt.includes("Question")) {
+                frontText = txt.replace(/<strong>.*?<\/strong>:?/i, "").trim();
+              } else if (txt.includes("Back") || txt.includes("Answer")) {
+                backText = txt.replace(/<strong>.*?<\/strong>:?/i, "").trim();
+              } else if (txt.includes("Takeaway")) {
+                takeaway = txt.replace(/<strong>.*?<\/strong>:?/i, "").trim();
+              }
+            });
+
+            if (frontText && backText) {
+              const cardDiv = document.createElement("div");
+              cardDiv.className = "flashcard-item";
+              cardDiv.innerHTML = `
+                <div class="flashcard-header">
+                  <span>${h3.textContent}</span>
+                  <span class="flashcard-toggle-pill">Click to reveal answer</span>
+                </div>
+                <div class="flashcard-question">${frontText}</div>
+                <div class="flashcard-answer">
+                  <div>${backText}</div>
+                  ${takeaway ? `<div style="margin-block-start:6px; font-weight:600; color:var(--accent);">💡 ${takeaway}</div>` : ''}
+                </div>
+              `;
+              cardDiv.addEventListener("click", () => {
+                cardDiv.classList.toggle("revealed");
+                const pill = cardDiv.querySelector(".flashcard-toggle-pill");
+                if (pill) {
+                  pill.textContent = cardDiv.classList.contains("revealed") ? "Hide answer" : "Click to reveal answer";
+                }
+              });
+              h3.replaceWith(cardDiv);
+              nextEl.remove();
+            }
+          }
+        }
+      });
     }
 
     async function sendChatMessage(message, actionType = "chat") {
@@ -3390,6 +3771,7 @@
 
         const { markdown, suggestions } = parseResponseAndSuggestions(fullText);
         contentDiv.innerHTML = renderMarkdownAndCitations(markdown || fullText);
+        await enhanceRenderedArtifacts(contentDiv);
 
         if (suggestions.length > 0) {
           const sugContainer = document.createElement("div");
@@ -3971,6 +4353,166 @@
         }
       });
     });
+
+    // Export Notebook Report (Markdown / Printable PDF)
+    const exportModal = document.getElementById("export-notebook-modal");
+    const btnExportNotebook = document.getElementById("btn-export-notebook");
+    const closeExportModal = document.getElementById("close-export-modal");
+    const btnExportCopyMarkdown = document.getElementById("btn-export-copy-markdown");
+    const btnExportDownloadMd = document.getElementById("btn-export-download-md");
+    const btnExportPrintPdf = document.getElementById("btn-export-print-pdf");
+
+    if (btnExportNotebook && exportModal) {
+      btnExportNotebook.addEventListener("click", () => {
+        exportModal.showModal();
+      });
+    }
+
+    if (closeExportModal && exportModal) {
+      closeExportModal.addEventListener("click", () => exportModal.close());
+    }
+
+    function generateCompiledNotebookMarkdown() {
+      const incOverview = document.getElementById("export-opt-overview")?.checked ?? true;
+      const incSources = document.getElementById("export-opt-sources")?.checked ?? true;
+      const incNotes = document.getElementById("export-opt-notes")?.checked ?? true;
+      const incChat = document.getElementById("export-opt-chat")?.checked ?? true;
+
+      const title = els.notebookTitleInput?.value?.trim() || "Research Notebook";
+      const timestamp = new Date().toLocaleString();
+      let md = `# ${title}\n*Generated by DaniBookLM — ${timestamp}*\n\n`;
+
+      if (incOverview) {
+        const ovDesc = document.querySelector("#overview-banner .overview-desc")?.textContent?.trim();
+        if (ovDesc) {
+          md += `## Notebook Overview & Study Guide\n${ovDesc}\n\n`;
+        }
+      }
+
+      if (incSources) {
+        md += `## Active Sources (${state.selectedSources.size})\n`;
+        if (state.selectedSources.size === 0) {
+          md += `*No sources were selected.*\n\n`;
+        } else {
+          Array.from(state.selectedSources).forEach(sName => {
+            const sObj = state.sources.find(s => s.name === sName);
+            const chars = sObj ? sObj.size_chars : 0;
+            const chunks = sObj ? sObj.chunks_count : 0;
+            md += `- **${sName}** (${chunks} chunks • ~${Math.round(chars / 1000)}k chars)\n`;
+          });
+          md += `\n`;
+        }
+      }
+
+      if (incNotes) {
+        md += `## Saved Studio Notes (${state.notes.length})\n`;
+        if (state.notes.length === 0) {
+          md += `*No notes saved.*\n\n`;
+        } else {
+          state.notes.forEach((n, idx) => {
+            md += `### ${idx + 1}. ${n.title}\n\n${n.content}\n\n`;
+          });
+        }
+      }
+
+      if (incChat && state.chatHistory.length > 0) {
+        md += `## Synthesis & Chat Sessions\n`;
+        state.chatHistory.forEach(turn => {
+          const role = turn.role === "user" ? "👤 User Query" : "🤖 DaniBookLM Assistant";
+          md += `### ${role}\n${turn.content}\n\n`;
+        });
+      }
+
+      return md;
+    }
+
+    if (btnExportCopyMarkdown) {
+      btnExportCopyMarkdown.addEventListener("click", async () => {
+        const md = generateCompiledNotebookMarkdown();
+        try {
+          await navigator.clipboard.writeText(md);
+          showToast("📋 Markdown report copied to clipboard!");
+          exportModal.close();
+        } catch (e) {
+          showToast("⚠️ Could not copy: " + e.message);
+        }
+      });
+    }
+
+    if (btnExportDownloadMd) {
+      btnExportDownloadMd.addEventListener("click", () => {
+        const md = generateCompiledNotebookMarkdown();
+        const title = (els.notebookTitleInput?.value?.trim() || "Notebook").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title}_report.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("📥 Markdown report downloaded");
+        exportModal.close();
+      });
+    }
+
+    if (btnExportPrintPdf) {
+      btnExportPrintPdf.addEventListener("click", () => {
+        const md = generateCompiledNotebookMarkdown();
+        const title = els.notebookTitleInput?.value?.trim() || "Research Notebook";
+        const htmlBody = marked.parse(md);
+
+        const printWin = window.open("", "_blank");
+        if (!printWin) {
+          alert("Please allow popups to generate the printable PDF report.");
+          return;
+        }
+
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>${title} — DaniBookLM</title>
+            <style>
+              body {
+                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                color: #1f1f1f;
+                background: #ffffff;
+                padding: 40px;
+                max-width: 820px;
+                margin: 0 auto;
+                line-height: 1.6;
+              }
+              h1 { font-size: 2rem; border-bottom: 2px solid #0b57d0; padding-bottom: 8px; color: #0b57d0; }
+              h2 { font-size: 1.3rem; margin-top: 28px; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; color: #1f1f1f; }
+              h3 { font-size: 1.05rem; margin-top: 18px; color: #333; }
+              pre { background: #f0f4f9; padding: 14px; border-radius: 8px; overflow-x: auto; font-family: monospace; }
+              blockquote { border-left: 3px solid #0b57d0; margin: 0; padding-left: 14px; color: #555; font-style: italic; }
+              table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+              th { background: #f0f4f9; }
+              .citation-badge { background: #d3e3fd; color: #041e49; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.8em; }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlBody}
+            <script>
+              window.onload = function() {
+                window.print();
+              };
+            <\/script>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
+        exportModal.close();
+      });
+    }
 
     loadInitialData();
   </script>
