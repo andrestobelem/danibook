@@ -47,12 +47,16 @@ The synthesis workspace where the author transforms Desk and Archive knowledge i
 _Avoid_: Right panel, tools sidebar, export menu
 
 **Studio Artifact (Artefacto de Studio)**:
-A structured analytical synthesis generated from active Sources—specifically a Study Guide, Concept Map / Glossary, Timeline, or Key Quotes compilation.
+A structured analytical synthesis generated from active Sources—specifically a Study Guide, Visual Mind Map, Flashcards & Quiz, Concept Glossary, Timeline, or Key Quotes compilation.
 _Avoid_: Report, summary, quick action, output, audit
 
-**Concept Map / Glossary (Mapa Conceptual / Glosario)**:
-A Studio Artifact that extracts the core concepts across active Sources, defines each term, and maps theoretical relationships and tensions between authors or chapters with exact Citations.
-_Avoid_: Dictionary, index, gap audit, word list
+**Concept Map / Visual Mind Map (Mapa Conceptual / Visual)**:
+A Studio Artifact that maps theoretical relationships, clusters, and entity bridges across active Sources as an interactive visual graph with exact Citations.
+_Avoid_: Dictionary, index, gap audit, word list, wireframe
+
+**Flashcards & Quiz (Tarjetas de Estudio)**:
+A Studio Artifact that compiles high-impact study cards with question prompts, revealed answers, and key takeaways backed by Citations.
+_Avoid_: Exam, test suite, survey, questionnaire
 
 **Note (Nota)**:
 A mutable piece of authorial writing or pinned synthesis saved permanently within the Studio.

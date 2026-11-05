@@ -39,7 +39,7 @@
   - `DeskMemory` scales and caps total prefix characters (`max_chars`) across all checked `Sources` dynamically based on `preset.context_length` so 36+ active books fit safely inside any model's context window (8K or 32K).
   - `ArchiveMemory` persists chunks in `data/cache/archive_fts5.sqlite` by `SHA-256` hash for sub-second startup and strips OCR control bytes (`ord(ch) < 32`) before prompt injection.
 - **Material Design 3 UI & Bun Gateway** ([src/danibook/ui/notebooklm.html](file:///Users/andrestobelem/ws/at/danibook/src/danibook/ui/notebooklm.html), [src/bun/server.ts](file:///Users/andrestobelem/ws/at/danibook/src/bun/server.ts)):
-  - Uses official `@material/web` components (`vendor/material-web.min.js`), a 3-way theme selector (`System` default, `Light`, `Dark`), animated thinking indicator, 5 curated `Collections`, `Sample` picker, and 4 `Studio Artifacts` (`summary`, `glossary`, `timeline`, `quotes`).
+  - Uses official `@material/web` components (`vendor/material-web.min.js`), native offline Mermaid (`vendor/mermaid.min.js`), a 3-way theme selector (`System` default, `Light`, `Dark`), animated thinking indicator, 5 curated `Collections`, `Sample` picker, notebook report export (Markdown/PDF), and 6 `Studio Artifacts` (`summary`, `mindmap`, `flashcards`, `glossary`, `timeline`, `quotes`).
 
 ## Execution Loop
 
