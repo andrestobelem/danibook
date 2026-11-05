@@ -26,8 +26,8 @@ class DeepResearcher:
         except Exception as e:
             # Fallback for offline or throttled connection
             results.append({
-                "title": f"Búsqueda sobre: {topic}",
-                "snippet": f"No se pudo completar la búsqueda en vivo ({e}). Puedes redactar o pegar apuntes manualmente.",
+                "title": f"Research on: {topic}",
+                "snippet": f"Web search could not be completed at this moment ({e}). You can edit or paste research notes manually.",
                 "url": "local://offline",
             })
         return results
@@ -39,19 +39,19 @@ class DeepResearcher:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         lines = [
             f"# INFORME DE DEEP RESEARCH: {topic.upper()}",
-            f"*Fecha de investigación: {timestamp}*",
+            f"*Research timestamp: {timestamp}*",
             "\n## Síntesis de Hallazgos y Fuentes Consultadas\n"
         ]
 
         for i, item in enumerate(findings, start=1):
             lines.append(f"### {i}. {item['title']}")
-            lines.append(f"**Fuente:** [{item['url']}]({item['url']})\n")
+            lines.append(f"**Source:** [{item['url']}]({item['url']})\n")
             lines.append(f"> {item['snippet']}\n")
 
-        lines.append("## Conclusiones para la Redacción")
+        lines.append("## Research Synthesis & Editorial Notes")
         lines.append(
-            "- Este documento fue generado mediante Deep Research y se incorporó a las fuentes del libro.\n"
-            "- Puedes contrastarlo con tus borradores activos para verificar coherencia de datos, fechas y ambientación."
+            "- This document was compiled autonomously via Deep Research and added to the notebook sources.\n"
+            "- You can query it in the chat or contrast it against active sources to evaluate facts, dates, and arguments."
         )
 
         return "\n".join(lines)

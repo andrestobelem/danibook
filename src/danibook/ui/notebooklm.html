@@ -4230,34 +4230,71 @@
 
     document.getElementById("run-research-btn").addEventListener("click", async () => {
       const topic = els.researchTopicInput.value.trim();
-      if (!topic) return;
-      els.researchOutputPreview.textContent = "Researching sources across the web...";
-      const res = await fetch("/api/research/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic })
-      });
-      const data = await res.json();
-      state.lastResearchTopic = topic;
-      state.lastResearchMarkdown = data.dossier;
-      els.researchOutputPreview.innerHTML = `<div class="msg-content">${renderMarkdownAndCitations(data.dossier)}</div>`;
-      els.importResearchBtn.disabled = false;
+      if (!topic) {
+        showToast("Please enter a research topic");
+        return;
+      }
+      const runBtn = document.getElementById("run-research-btn");
+      runBtn.disabled = true;
+      runBtn.innerHTML = `<span class="thinking-spinner" style="inline-size:14px; block-size:14px; border-width:2px;"></span> Researching...`;
+      els.researchOutputPreview.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; color:var(--text-secondary); padding:16px;">
+          <span class="thinking-spinner" style="inline-size:18px; block-size:18px; border-width:2px;"></span>
+          <span>Searching the web and compiling dossier on <b>${topic}</b>...</span>
+        </div>
+      `;
+
+      try {
+        const res = await fetch("/api/research/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic })
+        });
+        const data = await res.json();
+        state.lastResearchTopic = topic;
+        state.lastResearchMarkdown = data.dossier;
+        els.researchOutputPreview.innerHTML = `<div class="msg-content">${renderMarkdownAndCitations(data.dossier)}</div>`;
+        els.importResearchBtn.disabled = false;
+        showToast("✨ Research dossier compiled!");
+      } catch (err) {
+        els.researchOutputPreview.innerHTML = `<div style="color:var(--danger); padding:12px;">⚠️ Error researching web: ${err.message}</div>`;
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = `🔎 Research`;
+      }
+    });
+
+    els.researchTopicInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("run-research-btn").click();
+      }
     });
 
     els.importResearchBtn.addEventListener("click", async () => {
-      const res = await fetch("/api/research/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic: state.lastResearchTopic,
-          dossier: state.lastResearchMarkdown
-        })
-      });
-      const data = await res.json();
-      state.sources = data.sources;
-      state.selectedSources.add(data.imported);
-      renderSources();
-      els.researchModal.close();
+      els.importResearchBtn.disabled = true;
+      els.importResearchBtn.textContent = "Importing...";
+      try {
+        const res = await fetch("/api/research/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            topic: state.lastResearchTopic,
+            dossier: state.lastResearchMarkdown
+          })
+        });
+        const data = await res.json();
+        state.sources = data.sources;
+        if (data.imported) state.selectedSources.add(data.imported);
+        renderSources();
+        els.researchModal.close();
+        showToast(`📥 Deep Research dossier imported as source: "${data.imported}"`);
+      } catch (err) {
+        showToast("⚠️ Could not import research: " + err.message);
+      } finally {
+        els.importResearchBtn.disabled = false;
+        els.importResearchBtn.innerHTML = `📥 Import as Source`;
+      }
     });
 
     const initialOverviewHTML = els.chatStream ? els.chatStream.innerHTML : "";
