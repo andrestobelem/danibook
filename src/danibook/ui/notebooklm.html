@@ -2706,6 +2706,7 @@
       els.modelsManagerList.querySelectorAll(".btn-load-model").forEach(btn => {
         btn.addEventListener("click", async () => {
           const mid = btn.getAttribute("data-mid");
+          els.modelsManagerModal.close();
           await requestModelSwitchWithConfirmation(mid);
         });
       });
@@ -2797,7 +2798,7 @@
             }
           }
         } catch (_) {}
-      }, 400);
+      }, 250);
 
       try {
         const res = await fetch("/api/models/select", {
@@ -2814,10 +2815,17 @@
           els.modelProgressText.textContent = `✓ ${data.name} loaded into Metal GPU`;
           els.modelProgressPct.textContent = "100%";
           renderModels();
+          showToast(`⚡ Model ${data.name} active`);
           setTimeout(() => {
             els.modelProgressBanner.style.display = "none";
-          }, 1800);
+          }, 2000);
+        } else {
+          alert(data.message || "Error switching model.");
+          els.modelProgressBanner.style.display = "none";
         }
+      } catch (err) {
+        alert("Connection error switching model: " + err.message);
+        els.modelProgressBanner.style.display = "none";
       } finally {
         clearInterval(pollTimer);
         els.modelSelect.disabled = false;

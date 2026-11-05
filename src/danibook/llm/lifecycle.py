@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 import os
 import gc
 import threading
+import time
 import urllib.request
 from ..config import DEFAULT_MODEL_ID, GEMMA_MODELS, MODELS_DIR, ModelPreset
 
@@ -37,12 +38,16 @@ class ModelLifecycleManager:
             status_list.append({
                 "id": preset.id,
                 "name": preset.name,
+                "repo_id": preset.repo_id,
                 "size_label": preset.size_label,
                 "context_length": preset.context_length,
                 "supports_vision": preset.supports_vision,
                 "is_downloaded": local_exists,
+                "downloaded": local_exists,
                 "is_vision_ready": vision_ready,
                 "is_active": is_active,
+                "active": is_active,
+                "size_on_disk_mb": round(preset.local_path.stat().st_size / (1024 * 1024), 1) if local_exists else 0.0,
                 "is_downloading": (
                     self.download_state["active"]
                     and self.download_state["model_id"] == mid
@@ -90,7 +95,7 @@ class ModelLifecycleManager:
                 preset.hf_filename,
                 preset.local_path,
                 preset.id,
-                f"Descargando {preset.name}...",
+                f"Downloading {preset.name}...",
             )
 
         if preset.supports_vision and preset.mmproj_hf_filename and preset.mmproj_local_path:
@@ -100,7 +105,7 @@ class ModelLifecycleManager:
                     preset.mmproj_hf_filename,
                     preset.mmproj_local_path,
                     preset.id,
-                    f"Descargando proyector visual CLIP ({preset.name})...",
+                    f"Downloading visual CLIP projector ({preset.name})...",
                 )
 
     def _download_file_with_progress(
@@ -111,24 +116,32 @@ class ModelLifecycleManager:
         model_id: str,
         label: str,
     ):
-        """Downloads a file from Hugging Face with thread-safe percentage and MB reporting."""
+        """Downloads a file from Hugging Face with thread-safe percentage, speed, and MB reporting."""
         url = f"https://huggingface.co/{repo_id}/resolve/main/{filename}"
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         temp_dest = dest_path.with_suffix(dest_path.suffix + ".downloading")
 
-        self.download_state["active"] = True
-        self.download_state["model_id"] = model_id
-        self.download_state["percent"] = 0
-        self.download_state["status_text"] = label
+        with self._lock:
+            self.download_state["active"] = True
+            self.download_state["model_id"] = model_id
+            self.download_state["percent"] = 0
+            self.download_state["downloaded_mb"] = 0.0
+            self.download_state["total_mb"] = 0.0
+            self.download_state["speed_mb_s"] = 0.0
+            self.download_state["status_text"] = label
 
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "DaniBookLM/0.2"})
             with urllib.request.urlopen(req) as response:
                 total_size = int(response.headers.get("Content-Length", 0))
-                self.download_state["total_mb"] = round(total_size / (1024 * 1024), 1)
+                total_mb = round(total_size / (1024 * 1024), 1)
+                with self._lock:
+                    self.download_state["total_mb"] = total_mb
 
                 downloaded = 0
-                block_size = 1024 * 1024  # 1 MB blocks
+                block_size = 512 * 1024  # 512 KB blocks for smooth progress updates
+                start_time = time.time()
+                last_update_time = start_time
 
                 with open(temp_dest, "wb") as f:
                     while True:
@@ -137,16 +150,30 @@ class ModelLifecycleManager:
                             break
                         f.write(buffer)
                         downloaded += len(buffer)
-                        pct = int((downloaded / total_size) * 100) if total_size else 50
-                        self.download_state["percent"] = min(99, pct)
-                        self.download_state["downloaded_mb"] = round(downloaded / (1024 * 1024), 1)
+                        now = time.time()
+                        
+                        # Throttle state lock updates to at most every 0.1s
+                        if now - last_update_time >= 0.1 or downloaded == total_size:
+                            elapsed = max(0.01, now - start_time)
+                            speed_mb = round((downloaded / (1024 * 1024)) / elapsed, 2)
+                            pct = int((downloaded / total_size) * 100) if total_size else 50
+                            downloaded_mb = round(downloaded / (1024 * 1024), 1)
+                            
+                            with self._lock:
+                                self.download_state["percent"] = min(99, pct)
+                                self.download_state["downloaded_mb"] = downloaded_mb
+                                self.download_state["speed_mb_s"] = speed_mb
+                                self.download_state["status_text"] = f"{label} ({downloaded_mb} / {total_mb} MB • {speed_mb} MB/s)"
+                            last_update_time = now
 
             temp_dest.rename(dest_path)
-            self.download_state["percent"] = 100
+            with self._lock:
+                self.download_state["percent"] = 100
+                self.download_state["status_text"] = f"✓ {filename} download complete"
         except Exception as e:
             if temp_dest.exists():
                 temp_dest.unlink()
-            raise RuntimeError(f"Error descargando {filename} desde Hugging Face: {e}")
+            raise RuntimeError(f"Error downloading {filename} from Hugging Face: {e}")
         finally:
-            self.download_state["active"] = False
-            self.download_state["status_text"] = "Listo"
+            with self._lock:
+                self.download_state["active"] = False

@@ -298,9 +298,10 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
         return service.engine.download_state
 
     @api.post("/api/models/select")
-    def select_model(payload: SwitchModelPayload):
+    async def select_model(payload: SwitchModelPayload):
         try:
-            info = service.engine.switch_model(payload.model_id, auto_download=True)
+            from starlette.concurrency import run_in_threadpool
+            info = await run_in_threadpool(service.engine.switch_model, payload.model_id, auto_download=True)
             return {
                 "status": "ok",
                 **info,
