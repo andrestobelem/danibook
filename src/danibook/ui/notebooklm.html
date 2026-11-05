@@ -2608,9 +2608,20 @@
     }
 
     function updateMultimodalCapabilitiesUI() {
+      const hasActiveModel = Boolean(state.activeModelId && state.models.some(m => m.id === state.activeModelId && m.active));
       const isMulti = isCurrentModelMultimodal();
       const addSourceTitle = document.querySelector("#add-source-modal-title span:last-child");
       const addSourceDesc = document.getElementById("add-source-files-desc");
+
+      if (!hasActiveModel) {
+        clearAttachedImage();
+        els.chatAttachImgBtn.disabled = true;
+        els.chatAttachImgBtn.style.opacity = "0.35";
+        els.chatAttachImgBtn.style.cursor = "not-allowed";
+        els.chatAttachImgBtn.title = "No model is loaded. Click [Models] to download or load a Gemma model.";
+        els.chatInput.placeholder = "⚠️ No model is loaded in memory. Click [Models] above to download or activate one...";
+        return;
+      }
 
       if (isMulti) {
         els.chatAttachImgBtn.disabled = false;
@@ -2695,14 +2706,35 @@
 
     function renderModels() {
       els.modelSelect.innerHTML = "";
+      
+      const hasActiveModel = Boolean(state.activeModelId && state.models.some(m => m.id === state.activeModelId && m.active));
+      
+      if (!hasActiveModel) {
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "⚠️ No Model Loaded (Click Models)";
+        placeholder.selected = true;
+        els.modelSelect.appendChild(placeholder);
+      }
+
       state.models.forEach(m => {
         const opt = document.createElement("option");
         opt.value = m.id;
         const badge = m.downloaded ? `✓ On Disk (${m.size_on_disk_mb || m.size_label} MB)` : `⬇ Download HF (${m.size_label})`;
         opt.textContent = `${m.name} [${badge}]`;
-        if (m.id === state.activeModelId) opt.selected = true;
+        if (m.id === state.activeModelId && hasActiveModel) opt.selected = true;
         els.modelSelect.appendChild(opt);
       });
+
+      // Update status dot
+      if (hasActiveModel) {
+        els.modelStatusDot.style.background = "#34a853";
+        els.modelStatusDot.title = "Model active and loaded in GPU";
+      } else {
+        els.modelStatusDot.style.background = "#ea4335";
+        els.modelStatusDot.title = "No model loaded. Click 'Models' to download or activate one";
+      }
+
       updateMultimodalCapabilitiesUI();
       renderModelsManagerModal();
     }
@@ -3280,6 +3312,14 @@
 
     async function sendChatMessage(message, actionType = "chat") {
       if (!message.trim() && !state.currentAttachedImageUri) return;
+
+      const hasActiveModel = Boolean(state.activeModelId && state.models.some(m => m.id === state.activeModelId && m.active));
+      if (!hasActiveModel) {
+        showToast("⚠️ Please load or download a Gemma model first");
+        renderModelsManagerModal();
+        els.modelsManagerModal.showModal();
+        return;
+      }
 
       const userDiv = document.createElement("div");
       userDiv.className = "msg user";

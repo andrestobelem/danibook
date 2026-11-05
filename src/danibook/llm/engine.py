@@ -35,6 +35,14 @@ class LLMEngine:
 
         if not self.use_mock and self.model_path and self.model_path.exists():
             self._load_llama()
+        elif not self.use_mock and (not self.model_path or not self.model_path.exists()):
+            # If the default model file does not exist on disk, do not claim it is active
+            self.active_model_id = None
+
+    @property
+    def is_model_loaded(self) -> bool:
+        """Indicates whether a real LLM model is currently loaded in memory."""
+        return self._llm is not None or self.use_mock
 
     @property
     def download_state(self) -> Dict[str, Any]:
@@ -57,6 +65,7 @@ class LLMEngine:
                     pass
                 self._llm = None
                 self._vision_enabled = False
+                self.active_model_id = None
                 gc.collect()
 
     def delete_model_from_disk(self, model_id: str) -> Dict[str, Any]:
@@ -154,7 +163,12 @@ class LLMEngine:
         image_uris: Optional[List[str]] = None,
     ) -> Iterator[str]:
         """Generates a streaming response, respecting context bounds and multimodal inputs."""
-        if self.use_mock or self._llm is None:
+        if self._llm is None and not self.use_mock:
+            yield "⚠️ **No model is currently loaded in memory.**\n\n"
+            yield "Please click the **[Models]** button in the top bar to download or activate a Gemma model from Hugging Face before asking questions."
+            return
+
+        if self.use_mock:
             yield from self._mock_stream(user_prompt)
             return
 

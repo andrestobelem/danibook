@@ -245,6 +245,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
             "notes": service.get_notes_list(),
             "models": service.engine.get_models_status(),
             "active_model_id": service.engine.active_model_id,
+            "is_model_loaded": service.engine.is_model_loaded,
             "vision_enabled": service.engine._vision_enabled,
             "collections": service.get_collections_list(),
             "samples": service.get_samples_list(),
@@ -289,6 +290,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
         return {
             "models": service.engine.get_models_status(),
             "active_model_id": service.engine.active_model_id,
+            "is_model_loaded": service.engine.is_model_loaded,
             "vision_enabled": service.engine._vision_enabled,
             "download_state": service.engine.download_state,
         }
@@ -305,6 +307,8 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
             return {
                 "status": "ok",
                 **info,
+                "active_model_id": service.engine.active_model_id,
+                "is_model_loaded": service.engine.is_model_loaded,
                 "models": service.engine.get_models_status(),
             }
         except Exception as e:
@@ -325,6 +329,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
             "status": "ok",
             "models": service.engine.get_models_status(),
             "active_model_id": service.engine.active_model_id,
+            "is_model_loaded": service.engine.is_model_loaded,
         }
 
     @api.post("/api/sources/select")
