@@ -238,7 +238,7 @@
       padding: 4px 10px;
       border-radius: var(--radius-pill);
       box-shadow: var(--shadow-panel);
-      max-inline-size: 260px;
+      max-inline-size: 340px;
       min-inline-size: 0;
     }
 
@@ -1931,12 +1931,13 @@
       </button>
 
       <!-- Dynamic Hugging Face Gemma Model Selector + Disk Management -->
-      <div class="model-selector-wrap" title="Select Gemma model (unloads previous model from GPU and downloads from Hugging Face if not on disk)">
+      <div class="model-selector-wrap" title="Current active model. Click 'Models' to download or switch models">
         <span id="model-status-dot" class="status-dot" aria-hidden="true"></span>
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px; color:var(--accent);">memory</span>
         <select id="model-select" class="model-select" aria-label="Select Gemma Model"></select>
-        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Manage and delete models from disk" aria-label="Manage models on disk and GPU">
-          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">hard_drive</span>
+        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:4px 10px; display:inline-flex; align-items:center; gap:4px; font-weight:600; border:1px solid var(--border-subtle); background:var(--bg-card);" title="Download new models or manage disk space" aria-label="Manage models on disk and GPU">
+          <span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px; color:var(--accent);">cloud_download</span>
+          <span>Models</span>
         </button>
       </div>
 
@@ -2349,18 +2350,24 @@
   </dialog>
 
   <!-- Models Disk & Memory Manager Modal -->
-  <dialog id="models-manager-modal" class="nb-modal" closedby="any" aria-labelledby="models-manager-title">
+  <dialog id="models-manager-modal" class="nb-modal" closedby="any" aria-labelledby="models-manager-title" style="max-inline-size: 680px;">
     <div class="modal-header">
       <h3 id="models-manager-title" style="display:flex; align-items:center; gap:8px;">
-        <span class="material-symbols-outlined" style="color:var(--accent);">hard_drive</span>
-        <span>Gemma Models Disk & GPU Memory Manager</span>
+        <span class="material-symbols-outlined" style="color:var(--accent);">cloud_download</span>
+        <span>Model Downloads & GPU Manager</span>
       </h3>
       <button type="button" class="btn-mini" id="close-models-manager-modal">✕ Close</button>
     </div>
-    <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:12px;">
-      When loading a model, the previous model is automatically unloaded from Apple Metal GPU VRAM. From here you can also <b>delete .gguf files from disk</b> to free gigabytes, or download them again with live progress.
-    </p>
-    <div id="models-manager-list" style="display:flex; flex-direction:column; gap:10px; max-block-size:55dvh; overflow-y:auto;"></div>
+    <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 14px; margin-block-end:14px; font-size:0.83rem; color:var(--text-secondary); line-height:1.45;">
+      <div style="font-weight:600; color:var(--text-primary); margin-block-end:2px; display:flex; align-items:center; gap:6px;">
+        <span class="material-symbols-outlined" style="font-size:16px; color:var(--accent);">info</span>
+        <span>How model downloads work:</span>
+      </div>
+      <div>
+        Models download directly from Hugging Face in verified GGUF quant format for Apple Silicon Metal. Models not yet on disk show a clear <b>"Download from Hugging Face"</b> button. While downloading, you see real-time speed (MB/s), downloaded MBs, and a linear progress bar.
+      </div>
+    </div>
+    <div id="models-manager-list" style="display:flex; flex-direction:column; gap:12px; max-block-size:55dvh; overflow-y:auto;"></div>
   </dialog>
 
   <script>
@@ -2707,38 +2714,68 @@
         const card = document.createElement("div");
         card.className = "collection-item-card";
         const isActive = m.id === state.activeModelId && m.active;
-        const statusBadge = isActive
-          ? `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c;">⚡ Active in Metal GPU</span>`
-          : (m.downloaded
-              ? `<span class="collection-file-chip">✓ Saved on disk (${m.size_on_disk_mb || m.size_label} MB)</span>`
-              : `<span class="collection-file-chip" style="color:var(--accent); font-weight:600;">☁️ Requires Download (${m.size_label})</span>`);
+        
+        let statusBadge = "";
+        let actionBtnHTML = "";
 
-        const actionBtnLabel = isActive
-          ? 'Reload in GPU'
-          : (m.downloaded ? 'Load in GPU (Unloads active)' : 'Download from Hugging Face & Activate');
+        if (isActive) {
+          statusBadge = `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c; font-size:0.75rem; padding:4px 10px;">⚡ Active in GPU</span>`;
+          actionBtnHTML = `
+            <button type="button" class="btn btn-secondary btn-load-model" data-mid="${m.id}" style="padding:6px 14px; font-size:0.78rem;">
+              <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
+              <span>Reload in GPU</span>
+            </button>
+          `;
+        } else if (m.downloaded) {
+          statusBadge = `<span class="collection-file-chip" style="background:var(--pill-bg); color:var(--pill-text); font-weight:600; padding:4px 10px;">✓ Downloaded (${m.size_on_disk_mb || m.size_label} MB)</span>`;
+          actionBtnHTML = `
+            <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 14px; font-size:0.78rem;">
+              <span class="material-symbols-outlined" style="font-size:16px;">bolt</span>
+              <span>Load in GPU</span>
+            </button>
+          `;
+        } else {
+          statusBadge = `<span class="collection-file-chip" style="background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent); font-weight:600; padding:4px 10px; border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);">☁️ Available to Download (${m.size_label})</span>`;
+          actionBtnHTML = `
+            <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 16px; font-size:0.80rem; font-weight:600; background:var(--accent); color:var(--on-accent); box-shadow:0 2px 6px color-mix(in srgb, var(--accent) 30%, transparent);">
+              <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+              <span>Download & Activate</span>
+            </button>
+          `;
+        }
+
+        const visionChip = m.supports_vision
+          ? `<span style="font-size:0.72rem; background:color-mix(in srgb, #9333ea 15%, transparent); color:#9333ea; font-weight:600; padding:2px 8px; border-radius:12px; border:1px solid color-mix(in srgb, #9333ea 30%, transparent);">👁️ Vision / Multimodal</span>`
+          : `<span style="font-size:0.72rem; color:var(--text-muted);">Text Only (128K/32K)</span>`;
 
         card.innerHTML = `
-          <div class="collection-item-header">
-            <div class="collection-title">
-              <span class="material-symbols-outlined" style="color:var(--accent);">memory</span>
-              <span>${m.name}</span>
+          <div class="collection-item-header" style="align-items:flex-start;">
+            <div>
+              <div class="collection-title" style="font-size:0.95rem; font-weight:600;">
+                <span class="material-symbols-outlined" style="color:var(--accent);">memory</span>
+                <span>${m.name}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; margin-block-start:4px;">
+                ${visionChip}
+                <span style="font-size:0.75rem; color:var(--text-muted);">Context: ${(m.context_length / 1024).toFixed(0)}K</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Repo: <code>${m.repo_id}</code></span>
+              </div>
             </div>
             ${statusBadge}
           </div>
-          <div class="collection-desc">
-            ${m.downloaded ? `Model ready on disk. Repository: <code>${m.repo_id}</code>` : `<b>Model is not on disk</b> (deleted or not downloaded yet). Download size is approximately ${m.size_label}.`}
+          <div class="collection-desc" style="margin-block-start:6px; font-size:0.82rem; color:var(--text-secondary);">
+            ${m.downloaded
+              ? `Model files are completely stored on disk. Click <b>Load in GPU</b> to use this model for chat and notes.`
+              : `<span style="color:var(--text-primary); font-weight:500;">Model not installed on disk.</span> Click the button below to download the GGUF model files directly from Hugging Face (~${m.size_label}). You will see the download speed (MB/s) and live progress.`}
           </div>
-          <div style="display:flex; justify-content:flex-end; gap:8px; margin-block-start:6px;">
-            <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 12px; font-size:0.76rem;">
-              <span class="material-symbols-outlined" style="font-size:15px;">${m.downloaded ? 'bolt' : 'download'}</span>
-              <span>${actionBtnLabel}</span>
-            </button>
+          <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-block-start:10px; border-block-start:1px solid var(--border-subtle); padding-block-start:8px;">
             ${m.downloaded ? `
-              <button type="button" class="btn-mini btn-delete-model-disk" data-mid="${m.id}" style="color:var(--danger); border-color:var(--danger);">
-                <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
-                <span>Delete from disk</span>
+              <button type="button" class="btn-mini btn-delete-model-disk" data-mid="${m.id}" style="color:var(--danger); border-color:var(--danger); margin-inline-end:auto;">
+                <span class="material-symbols-outlined" style="font-size:14px;">delete</span>
+                <span>Delete from disk to free space</span>
               </button>
-            ` : ''}
+            ` : '<span style="font-size:0.76rem; color:var(--text-muted); margin-inline-end:auto;">Verified Hugging Face repository</span>'}
+            ${actionBtnHTML}
           </div>
         `;
         els.modelsManagerList.appendChild(card);
@@ -2820,7 +2857,13 @@
       els.modelSelect.disabled = true;
       els.modelStatusDot.classList.add("downloading");
       els.modelProgressBanner.style.display = "flex";
-      els.modelProgressText.textContent = "Unloading previous model from Metal GPU and starting...";
+      
+      const targetModel = state.models.find(m => m.id === modelId);
+      const isDownload = targetModel && !targetModel.downloaded;
+      
+      els.modelProgressText.textContent = isDownload 
+        ? `Connecting to Hugging Face CDN for ${targetModel.name}...` 
+        : `Unloading previous model from Metal GPU and loading ${targetModel ? targetModel.name : modelId}...`;
       els.modelProgressPct.textContent = "0%";
       els.modelLinearProgress.indeterminate = true;
 
