@@ -32,7 +32,7 @@ class NotebookService:
     ):
         self.active_notebook = active_notebook or Notebook(
             id="default",
-            title="Cuaderno Principal",
+            title="Main Notebook",
         )
         # If default dirs are passed, bind them to workspace_dir and notes_dir
         self.workspace_dir = Path(workspace_dir).resolve()
@@ -110,8 +110,8 @@ class NotebookService:
         ext = Path(safe_name).suffix.lower()
         if not self.is_active_model_multimodal and ext in (DocumentParser.IMAGE_EXTENSIONS | DocumentParser.AUDIO_EXTENSIONS):
             raise ValueError(
-                f"El modelo activo ({self.engine.preset.name}) es de solo texto y no admite adjuntar archivos multimedia ({ext}). "
-                f"Cambia a un modelo Multimodal (ej. Gemma 4 E2B o 12B) para subir imágenes o audio."
+                f"The active model ({self.engine.preset.name}) is text-only (solo texto) and does not support media attachments ({ext}). "
+                f"Switch to a Multimodal model (e.g. Gemma 4 E2B or 12B) to upload images or audio."
             )
         dest = (self.workspace_dir / safe_name).resolve()
         if dest.parent != self.workspace_dir:
@@ -128,9 +128,9 @@ class NotebookService:
 
     def ingest_pasted_text(self, title: str, content: str) -> str:
         """Creates a Markdown Source from pasted text and indexes it into Desk and Archive."""
-        safe_title = re.sub(r"[^a-zA-Z0-9_-]+", "_", title.strip())[:45].strip("_") or "Texto_Pegado"
+        safe_title = re.sub(r"[^a-zA-Z0-9_-]+", "_", title.strip())[:45].strip("_") or "Pasted_Text"
         dest = self.workspace_dir / f"{safe_title}.md"
-        dest.write_text(f"# {title.strip() or 'Texto Pegado'}\n\n{content}", encoding="utf-8")
+        dest.write_text(f"# {title.strip() or 'Pasted Text'}\n\n{content}", encoding="utf-8")
         parsed = DocumentParser.parse(dest)
         return self._register_parsed_source(parsed)
 
@@ -148,7 +148,7 @@ class NotebookService:
     def get_source_detail(self, name: str) -> Dict:
         doc = self.sources.get(name)
         if not doc:
-            return {"name": name, "chunks_count": 0, "preview": "Fuente no encontrada.", "media_type": "text"}
+            return {"name": name, "chunks_count": 0, "preview": "Source not found.", "media_type": "text"}
         return {
             "name": name,
             "chunks_count": len(doc.chunks),
@@ -191,7 +191,7 @@ class NotebookService:
         if clear_notes:
             self.studio.clear_all_notes()
         return {
-            "title": "Cuaderno sin título",
+            "title": "Untitled Notebook",
             "sources": self.get_sources_list(),
             "notes": self.get_notes_list(),
             "selected": self.desk.get_active_files(),
@@ -254,7 +254,7 @@ class NotebookService:
         if not note:
             raise ValueError(f"Note not found: {note_id_or_title}")
 
-        safe_title = re.sub(r"[^\w\-\.]+", "_", note["title"]).strip("_") or "Nota"
+        safe_title = re.sub(r"[^\w\-\.]+", "_", note["title"]).strip("_") or "Note"
         filename = f"{safe_title}.md"
         dest = self.workspace_dir / filename
 
@@ -274,8 +274,8 @@ class NotebookService:
         active_sources = self.desk.get_active_files()
         if not active_sources:
             return {
-                "title": "Cuaderno de Investigación",
-                "overview": "No hay fuentes seleccionadas. Sube o selecciona documentos para comenzar el análisis."
+                "title": "Research Notebook",
+                "overview": "No sources selected. Upload or select documents to begin analysis."
             }
 
         desk_preview = self.desk.build_desk_prefix(max_chars=6000)

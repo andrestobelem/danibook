@@ -286,12 +286,12 @@ class LLMEngine:
         """Generates a short overview of the sources and a concise notebook title."""
         if not sources_summary or not sources_summary.strip():
             return {
-                "title": "Cuaderno de Investigación",
-                "overview": "No hay fuentes seleccionadas. Sube o selecciona documentos para comenzar el análisis."
+                "title": "Research Notebook",
+                "overview": "No sources selected. Upload or select documents to begin analysis."
             }
 
-        default_title = "Cuaderno de Investigación"
-        default_overview = "Fuentes cargadas y listas para consulta. Formula preguntas o ejecuta acciones guiadas en el panel inferior."
+        default_title = "Research Notebook"
+        default_overview = "Sources loaded and ready for analysis. Ask questions or run guided actions below."
 
         if self.use_mock or self._llm is None:
             return {

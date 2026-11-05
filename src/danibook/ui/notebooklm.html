@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1875,41 +1875,41 @@
       </div>
       <span style="font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; color:var(--text-primary);">DaniBookLM</span>
       <span style="color:var(--border-subtle);" aria-hidden="true">/</span>
-      <input type="text" id="notebook-title-input" class="notebook-title" value="Cuaderno de Investigación Local" aria-label="Título del Cuaderno" />
-      <button type="button" id="btn-new-notebook" class="btn-mini" title="Crear un nuevo cuaderno limpio" aria-label="Nuevo Cuaderno">
+      <input type="text" id="notebook-title-input" class="notebook-title" value="Local Research Notebook" aria-label="Notebook Title" />
+      <button type="button" id="btn-new-notebook" class="btn-mini" title="Create a new clean notebook" aria-label="New Notebook">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; color:var(--accent);">add</span>
-        <span>Nuevo cuaderno</span>
+        <span>New notebook</span>
       </button>
     </div>
     <div class="header-meta">
       <!-- Live Context Window Headroom & Auto-Compaction Indicator -->
-      <button type="button" id="context-meter-pill" class="context-meter-pill" title="Ventana de contexto libre (se compacta automáticamente al quedar <10%)" aria-label="Estado de ventana de contexto">
+      <button type="button" id="context-meter-pill" class="context-meter-pill" title="Free context window (automatically compacts when <10% free)" aria-label="Context window status">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px; color:var(--accent);">data_usage</span>
-        <span id="context-meter-label">32K • 88% libre</span>
+        <span id="context-meter-label">32K • 88% free</span>
         <span class="context-meter-bar" aria-hidden="true"><span id="context-meter-fill" class="context-meter-fill"></span></span>
       </button>
 
       <!-- Dynamic Hugging Face Gemma Model Selector + Disk Management -->
-      <div class="model-selector-wrap" title="Seleccionar modelo Gemma (se descarga el anterior de GPU y baja de Hugging Face si no está en disco)">
+      <div class="model-selector-wrap" title="Select Gemma model (unloads previous model from GPU and downloads from Hugging Face if not on disk)">
         <span id="model-status-dot" class="status-dot" aria-hidden="true"></span>
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px; color:var(--accent);">memory</span>
-        <select id="model-select" class="model-select" aria-label="Seleccionar Modelo Gemma"></select>
-        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Gestionar y borrar modelos del disco" aria-label="Gestionar modelos en disco y GPU">
+        <select id="model-select" class="model-select" aria-label="Select Gemma Model"></select>
+        <button type="button" id="btn-manage-models" class="btn-mini" style="padding:3px 8px; border:none; background:transparent;" title="Manage and delete models from disk" aria-label="Manage models on disk and GPU">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">hard_drive</span>
         </button>
       </div>
 
       <!-- Material 3 Segmented Theme Switcher: System (Default) / Light / Dark -->
-      <div class="theme-segmented-group" role="group" aria-label="Selector de tema">
-        <button type="button" class="theme-seg-btn active" data-theme-choice="system" aria-pressed="true" title="Modo Sistema (Por defecto)">
+      <div class="theme-segmented-group" role="group" aria-label="Theme selector">
+        <button type="button" class="theme-seg-btn active" data-theme-choice="system" aria-pressed="true" title="System mode (Default)">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">routine</span>
           <span>System</span>
         </button>
-        <button type="button" class="theme-seg-btn" data-theme-choice="light" aria-pressed="false" title="Modo Claro">
+        <button type="button" class="theme-seg-btn" data-theme-choice="light" aria-pressed="false" title="Light mode">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">light_mode</span>
           <span>Light</span>
         </button>
-        <button type="button" class="theme-seg-btn" data-theme-choice="dark" aria-pressed="false" title="Modo Oscuro">
+        <button type="button" class="theme-seg-btn" data-theme-choice="dark" aria-pressed="false" title="Dark mode">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">dark_mode</span>
           <span>Dark</span>
         </button>
@@ -1920,20 +1920,20 @@
   <!-- Official Google @material/web Progress Banner for Model Download & GPU Loading -->
   <div id="model-progress-banner" class="model-progress-banner" role="status" aria-live="polite">
     <div class="model-progress-header">
-      <span id="model-progress-text">Preparando modelo...</span>
+      <span id="model-progress-text">Preparing model...</span>
       <span id="model-progress-pct">0%</span>
     </div>
-    <md-linear-progress id="model-linear-progress" value="0" max="1" aria-label="Progreso de carga del modelo"></md-linear-progress>
+    <md-linear-progress id="model-linear-progress" value="0" max="1" aria-label="Model loading progress"></md-linear-progress>
   </div>
 
   <!-- Non-intrusive Toast Notification -->
   <div id="nb-toast" class="nb-toast" role="status" aria-live="polite"></div>
 
   <!-- Mobile / Small Viewport Segmented Tab Switcher (Sources / Chat / Studio) -->
-  <nav class="mobile-tab-bar" aria-label="Navegación en pantallas pequeñas">
+  <nav class="mobile-tab-bar" aria-label="Small screen navigation">
     <button type="button" class="mobile-tab-btn" data-panel-target="panel-sources">
       <span class="material-symbols-outlined" style="font-size:17px;">folder_open</span>
-      <span>Fuentes</span>
+      <span>Sources</span>
     </button>
     <button type="button" class="mobile-tab-btn active" data-panel-target="panel-chat">
       <span class="material-symbols-outlined" style="font-size:17px;">forum</span>
@@ -1953,15 +1953,15 @@
       <div class="panel-header">
         <h2 id="panel-sources-heading" class="panel-title">
           <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">folder_open</span>
-          <span>Fuentes</span>
+          <span>Sources</span>
         </h2>
-        <span id="sources-total-badge" style="font-size: 0.78rem; color: var(--text-muted);">0 archivos</span>
+        <span id="sources-total-badge" style="font-size: 0.78rem; color: var(--text-muted);">0 files</span>
       </div>
       <div class="panel-body">
         <div class="source-actions">
           <button type="button" class="btn btn-primary" id="btn-open-add-source">
             <span class="material-symbols-outlined" aria-hidden="true">add</span>
-            <span>Agregar fuente</span>
+            <span>Add source</span>
           </button>
           <button type="button" class="btn" id="btn-open-research">
             <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>
@@ -1969,12 +1969,12 @@
           </button>
         </div>
 
-        <button type="button" class="collections-bar-btn" id="btn-open-collections" title="Cargar colecciones temáticas precargadas">
+        <button type="button" class="collections-bar-btn" id="btn-open-collections" title="Load pre-built curated collections">
           <div style="display:flex; align-items:center; gap:6px;">
             <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px; color:var(--accent);">library_books</span>
-            <span>Colecciones listas</span>
+            <span>Curated collections</span>
           </div>
-          <span id="collections-count-badge" style="font-size:0.74rem; color:var(--text-muted);">5 temas</span>
+          <span id="collections-count-badge" style="font-size:0.74rem; color:var(--text-muted);">5 themes</span>
         </button>
 
         <div class="source-search-wrap">
@@ -1983,8 +1983,8 @@
             type="search"
             id="source-filter-input"
             class="source-search-input"
-            placeholder="Filtrar entre tus fuentes..."
-            aria-label="Filtrar fuentes por nombre"
+            placeholder="Filter your sources..."
+            aria-label="Filter sources by name"
             autocomplete="off"
           />
         </div>
@@ -1998,8 +1998,8 @@
         />
 
         <div class="select-all-bar">
-          <label for="toggle-all-sources" style="cursor:pointer;">Seleccionar todas las fuentes</label>
-          <input type="checkbox" id="toggle-all-sources" checked class="source-check" aria-label="Seleccionar todas las fuentes" />
+          <label for="toggle-all-sources" style="cursor:pointer;">Select all sources</label>
+          <input type="checkbox" id="toggle-all-sources" checked class="source-check" aria-label="Select all sources" />
         </div>
 
         <div id="sources-list" class="sources-list">
@@ -2013,11 +2013,11 @@
       <div class="panel-header">
         <h1 id="panel-chat-heading" class="panel-title">
           <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">forum</span>
-          <span>Chat Multimodal</span>
+          <span>Multimodal Chat</span>
         </h1>
         <button type="button" class="btn-mini" id="btn-clear-chat">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">restart_alt</span>
-          <span>Reiniciar charla</span>
+          <span>Reset chat</span>
         </button>
       </div>
 
@@ -2025,27 +2025,27 @@
         <div id="overview-banner" class="overview-banner">
           <div class="overview-title">
             <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
-            <span>Guía del Cuaderno</span>
+            <span>Notebook Guide</span>
           </div>
           <div class="overview-desc">
-            Tus fuentes locales (libros, PDFs, EPUBs de Cervantes, tablas CSV, imágenes, audios y páginas web) están listas. Marca a la izquierda qué archivos e imágenes incluir en tu <b>Desk</b> activo o usa una acción rápida.
+            Your local sources (books, PDFs, Cervantes EPUBs, CSV tables, images, audio, and web pages) are ready. Select which files and images to include in your active <b>Desk</b> on the left, or run a quick action.
           </div>
           <div class="chip-row">
             <button type="button" class="suggestion-chip" data-action="summary">
               <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">summarize</span>
-              <span>Resumir fuentes activas</span>
+              <span>Summarize active sources</span>
             </button>
             <button type="button" class="suggestion-chip" data-action="glossary">
               <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">hub</span>
-              <span>Armar mapa conceptual y glosario</span>
+              <span>Concept map & glossary</span>
             </button>
             <button type="button" class="suggestion-chip" data-action="timeline">
               <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">timeline</span>
-              <span>Armar línea de tiempo</span>
+              <span>Build timeline</span>
             </button>
             <button type="button" class="suggestion-chip" data-action="quotes">
               <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">format_quote</span>
-              <span>Extraer citas clave</span>
+              <span>Extract key quotes</span>
             </button>
           </div>
         </div>
@@ -2053,24 +2053,24 @@
 
       <div class="chat-composer-wrap">
         <div id="chat-img-preview-bar" class="chat-img-preview-bar">
-          <img id="chat-img-preview-thumb" class="chat-img-preview-thumb" src="" alt="Vista previa de imagen adjunta" />
+          <img id="chat-img-preview-thumb" class="chat-img-preview-thumb" src="" alt="Attached image preview" />
           <span id="chat-img-preview-name" style="font-size:0.78rem; color:var(--text-primary); font-weight:600; flex:1 1 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
-          <button type="button" class="btn-mini" id="chat-img-remove-btn" style="padding:2px 8px; font-size:0.7rem;">✕ Quitar</button>
+          <button type="button" class="btn-mini" id="chat-img-remove-btn" style="padding:2px 8px; font-size:0.7rem;">✕ Remove</button>
         </div>
         <form id="chat-form" class="chat-composer">
-          <button type="button" class="chat-attach-btn" id="chat-attach-img-btn" title="Adjuntar imagen para que el modelo la vea" aria-label="Adjuntar imagen al chat">
+          <button type="button" class="chat-attach-btn" id="chat-attach-img-btn" title="Attach image for model vision" aria-label="Attach image to chat">
             <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
           </button>
           <input type="file" id="chat-img-file-input" accept="image/*" style="display:none;" />
-          <span id="active-sources-pill" class="source-counter-pill" title="Fuentes seleccionadas en el Desk">0 fuentes</span>
+          <span id="active-sources-pill" class="source-counter-pill" title="Sources selected in Desk">0 sources</span>
           <textarea
             id="chat-input"
             class="chat-input"
             rows="1"
-            placeholder="Pregunta sobre tus documentos o imágenes activas... (Enter para enviar, Shift+Enter nueva línea)"
-            aria-label="Escribe tu consulta para el cuaderno"
+            placeholder="Ask about your active documents or images... (Enter to send, Shift+Enter for new line)"
+            aria-label="Write your query for the notebook"
           ></textarea>
-          <button type="submit" id="chat-send-btn" class="send-circle-btn" title="Enviar consulta" aria-label="Enviar consulta">
+          <button type="submit" id="chat-send-btn" class="send-circle-btn" title="Send query" aria-label="Send query">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
           </button>
         </form>
@@ -2082,40 +2082,40 @@
       <div class="panel-header">
         <h2 id="panel-studio-heading" class="panel-title">
           <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--accent);">dashboard_customize</span>
-          <span>Studio & Notas</span>
+          <span>Studio & Notes</span>
         </h2>
         <button type="button" class="btn btn-primary" id="btn-new-note" style="padding: 6px 12px; font-size: 0.78rem;">
           <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">note_add</span>
-          <span>Nota</span>
+          <span>Note</span>
         </button>
       </div>
 
       <div class="panel-body">
-        <h3 class="studio-section-title">Generar Artefacto</h3>
+        <h3 class="studio-section-title">Generate Artifact</h3>
         <div class="studio-grid">
           <button type="button" class="studio-tile" data-studio="summary">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">menu_book</span>
-            <span class="tile-label">Guía de Estudio</span>
-            <span class="tile-sub">Síntesis temática</span>
+            <span class="tile-label">Study Guide</span>
+            <span class="tile-sub">Thematic summary</span>
           </button>
           <button type="button" class="studio-tile" data-studio="glossary">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">hub</span>
-            <span class="tile-label">Mapa Conceptual</span>
-            <span class="tile-sub">Glosario y relaciones</span>
+            <span class="tile-label">Concept Map</span>
+            <span class="tile-sub">Glossary & relations</span>
           </button>
           <button type="button" class="studio-tile" data-studio="timeline">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">schedule</span>
-            <span class="tile-label">Cronología</span>
-            <span class="tile-sub">Hitos y eventos</span>
+            <span class="tile-label">Timeline</span>
+            <span class="tile-sub">Milestones & events</span>
           </button>
           <button type="button" class="studio-tile" data-studio="quotes">
             <span class="material-symbols-outlined tile-icon" aria-hidden="true">format_quote</span>
-            <span class="tile-label">Citas Textuales</span>
-            <span class="tile-sub">Fragmentos exactos</span>
+            <span class="tile-label">Key Quotes</span>
+            <span class="tile-sub">Exact excerpts</span>
           </button>
         </div>
 
-        <h3 class="studio-section-title" style="margin-block-start: 10px;">Notas Guardadas</h3>
+        <h3 class="studio-section-title" style="margin-block-start: 10px;">Saved Notes</h3>
         <div id="notes-list" class="notes-grid">
           <!-- Dynamically populated notes -->
         </div>
@@ -2129,39 +2129,39 @@
     <div class="modal-header">
       <h3 id="add-source-modal-title" style="display:flex; align-items:center; gap:8px;">
         <span class="material-symbols-outlined" style="color:var(--accent);">upload_file</span>
-        <span>Agregar Fuentes al Cuaderno (Multimodal)</span>
+        <span>Add Sources to Notebook (Multimodal)</span>
       </h3>
-      <button type="button" class="btn-mini" id="close-add-source-modal">✕ Cerrar</button>
+      <button type="button" class="btn-mini" id="close-add-source-modal">✕ Close</button>
     </div>
 
     <div class="add-source-grid">
       <!-- 1. Local Files (PDF, DOCX, EPUB, CSV, Images, Audio) -->
       <div class="add-source-card">
-        <h4><span class="material-symbols-outlined" style="color:var(--accent);">attach_file</span> Archivos Permitidos</h4>
-        <p id="add-source-files-desc">Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.</p>
+        <h4><span class="material-symbols-outlined" style="color:var(--accent);">attach_file</span> Allowed Files</h4>
+        <p id="add-source-files-desc">Upload documents (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>images (.png, .jpg, .webp)</b> for Gemma 4 vision, or <b>audio (.mp3, .wav)</b>.</p>
         <button type="button" class="btn btn-primary" id="trigger-file-picker-btn" style="margin-block-start:auto;">
-          <span class="material-symbols-outlined">folder</span> Elegir archivos del disco
+          <span class="material-symbols-outlined">folder</span> Choose files from disk
         </button>
       </div>
 
       <!-- 2. Web URL / YouTube Link -->
       <div class="add-source-card">
-        <h4><span class="material-symbols-outlined" style="color:var(--accent);">link</span> Sitio Web o YouTube</h4>
-        <p>Pega el enlace de cualquier artículo web o un video de YouTube para importar su contenido y transcripción.</p>
+        <h4><span class="material-symbols-outlined" style="color:var(--accent);">link</span> Website or YouTube</h4>
+        <p>Paste any web article link or YouTube video to import its contents and transcript.</p>
         <div style="display:flex; gap:6px; margin-block-start:auto;">
           <input type="url" id="source-url-input" class="note-title-field" placeholder="https://..." style="padding:7px 10px; font-size:0.82rem;" />
-          <button type="button" class="btn btn-primary" id="import-url-source-btn">Importar</button>
+          <button type="button" class="btn btn-primary" id="import-url-source-btn">Import</button>
         </div>
       </div>
     </div>
 
     <!-- 3. Paste Copied Text -->
     <div class="add-source-card" style="margin-block-start:4px;">
-      <h4><span class="material-symbols-outlined" style="color:var(--accent);">content_paste</span> Pegar Texto Directo</h4>
-      <input type="text" id="paste-source-title" class="note-title-field" placeholder="Título de la fuente (ej: Apuntes_Reunion)" style="margin-block-top:4px;" />
-      <textarea id="paste-source-content" class="note-editor-area" style="min-block-size:110px;" placeholder="Pega aquí texto copiado para incorporarlo como fuente..."></textarea>
+      <h4><span class="material-symbols-outlined" style="color:var(--accent);">content_paste</span> Paste Direct Text</h4>
+      <input type="text" id="paste-source-title" class="note-title-field" placeholder="Source title (e.g. Meeting_Notes)" style="margin-block-top:4px;" />
+      <textarea id="paste-source-content" class="note-editor-area" style="min-block-size:110px;" placeholder="Paste copied text here to add it as a source..."></textarea>
       <div style="display:flex; justify-content:flex-end;">
-        <button type="button" class="btn btn-primary" id="save-paste-source-btn">Guardar como fuente</button>
+        <button type="button" class="btn btn-primary" id="save-paste-source-btn">Save as source</button>
       </div>
     </div>
   </dialog>
@@ -2171,37 +2171,37 @@
     <div class="modal-header">
       <h3 id="collections-modal-title" style="display:flex; align-items:center; gap:8px;">
         <span class="material-symbols-outlined" style="color:var(--accent);">library_books</span>
-        <span>Colecciones y Samples Listos</span>
+        <span>Curated Collections & Samples</span>
       </h3>
-      <button type="button" class="btn-mini" id="close-collections-modal">✕ Cerrar</button>
+      <button type="button" class="btn-mini" id="close-collections-modal">✕ Close</button>
     </div>
 
-    <!-- Tabs: Colecciones temáticas vs Archivos de muestra individuales -->
+    <!-- Tabs: Curated collections vs Individual sample files -->
     <div class="modal-tabs">
       <button type="button" class="modal-tab-btn active" id="tab-btn-collections">
         <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span>
-        <span>Colecciones Temáticas</span>
+        <span>Thematic Collections</span>
       </button>
       <button type="button" class="modal-tab-btn" id="tab-btn-samples">
         <span class="material-symbols-outlined" style="font-size:18px;">folder_special</span>
-        <span>Archivos Samples Individuales</span>
+        <span>Individual Sample Files</span>
       </button>
     </div>
 
-    <!-- Tab 1: Colecciones -->
+    <!-- Tab 1: Collections -->
     <div id="tab-pane-collections">
       <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:14px;">
-        Carga packs temáticos con obras maestras, apuntes de IA o ensayos de psicoanálisis con un clic.
+        Load curated packs with literary masterpieces, AI research papers, or psychoanalysis essays with one click.
       </p>
       <div id="collections-list" style="display:flex; flex-direction:column; gap:10px; max-block-size:55dvh; overflow-y:auto;">
         <!-- Populated dynamically -->
       </div>
     </div>
 
-    <!-- Tab 2: Samples Individuales -->
+    <!-- Tab 2: Individual Samples -->
     <div id="tab-pane-samples" style="display:none;">
       <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:14px;">
-        Selecciona obras y documentos de prueba específicos de <code>data/samples/</code> para sumarlos a tu mesa de trabajo.
+        Select specific test documents from <code>data/samples/</code> to add them to your active desk.
       </p>
       <div id="samples-list" class="samples-grid" style="max-block-size:55dvh; overflow-y:auto;">
         <!-- Populated dynamically -->
@@ -2212,13 +2212,13 @@
   <!-- Source Inspector Modal -->
   <dialog id="source-modal" class="nb-modal" closedby="any" aria-labelledby="source-modal-title">
     <div class="modal-header">
-      <h3 id="source-modal-title">Vista de Fuente</h3>
+      <h3 id="source-modal-title">Source Preview</h3>
       <div style="display:flex; gap:8px; align-items:center;">
         <button type="button" class="btn-mini" id="delete-source-modal-btn" style="color:var(--danger);">
           <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
-          <span>Quitar fuente</span>
+          <span>Delete source</span>
         </button>
-        <button type="button" class="btn-mini" id="close-source-modal">✕ Cerrar</button>
+        <button type="button" class="btn-mini" id="close-source-modal">✕ Close</button>
       </div>
     </div>
     <div id="source-modal-body" class="modal-body"></div>
@@ -2229,15 +2229,15 @@
     <div class="modal-header">
       <h3 id="confirm-modal-title" style="display:flex; align-items:center; gap:8px;">
         <span class="material-symbols-outlined" style="color:var(--accent);">help_outline</span>
-        <span id="confirm-modal-heading">Confirmar Acción</span>
+        <span id="confirm-modal-heading">Confirm Action</span>
       </h3>
-      <button type="button" class="btn-mini" id="confirm-modal-close-btn">✕ Cerrar</button>
+      <button type="button" class="btn-mini" id="confirm-modal-close-btn">✕ Close</button>
     </div>
     <div class="confirm-modal-box">
       <p id="confirm-modal-message" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5;"></p>
       <div class="confirm-modal-actions">
-        <button type="button" class="btn" id="confirm-modal-cancel-btn">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="confirm-modal-ok-btn">Aceptar</button>
+        <button type="button" class="btn" id="confirm-modal-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-modal-ok-btn">Confirm</button>
       </div>
     </div>
   </dialog>
@@ -2245,15 +2245,15 @@
   <!-- Note Editor Modal -->
   <dialog id="note-modal" class="nb-modal" closedby="any" aria-labelledby="note-modal-title">
     <div class="modal-header">
-      <h3 id="note-modal-title">📝 Editor de Nota</h3>
-      <button type="button" class="btn-mini" id="close-note-modal">✕ Cerrar</button>
+      <h3 id="note-modal-title">📝 Note Editor</h3>
+      <button type="button" class="btn-mini" id="close-note-modal">✕ Close</button>
     </div>
     <div>
       <div style="display:flex; gap:8px; align-items:center;">
-        <input type="text" id="note-title-input" class="note-title-field" placeholder="Título de la nota" style="flex:1;" />
-        <button type="button" class="btn-mini" id="btn-suggest-note-title" title="Generar título sugerido con IA según el contenido" style="white-space:nowrap;">
+        <input type="text" id="note-title-input" class="note-title-field" placeholder="Note title" style="flex:1;" />
+        <button type="button" class="btn-mini" id="btn-suggest-note-title" title="Suggest title with AI based on content" style="white-space:nowrap;">
           <span class="material-symbols-outlined" style="font-size:15px; color:var(--accent);">auto_awesome</span>
-          <span>Sugerir título</span>
+          <span>Suggest title</span>
         </button>
       </div>
 
@@ -2261,48 +2261,48 @@
       <div class="note-tabs-header">
         <button type="button" id="tab-note-edit" class="note-tab-btn active">
           <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
-          <span>Editar (Markdown)</span>
+          <span>Edit (Markdown)</span>
         </button>
         <button type="button" id="tab-note-preview" class="note-tab-btn">
           <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
-          <span>Vista Previa Visual</span>
+          <span>Visual Preview</span>
         </button>
       </div>
 
-      <textarea id="note-content-input" class="note-editor-area" placeholder="Escribe o pega texto en Markdown..."></textarea>
+      <textarea id="note-content-input" class="note-editor-area" placeholder="Write or paste Markdown content..."></textarea>
       <div id="note-preview-pane" class="note-preview-pane"></div>
 
       <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" class="btn btn-primary" id="save-note-confirm">💾 Guardar Nota en Disco</button>
+        <button type="button" class="btn btn-primary" id="save-note-confirm">💾 Save Note to Disk</button>
       </div>
     </div>
   </dialog>
 
   <!-- Floating Selection-to-Note Action Pill -->
-  <button type="button" id="selection-action-pill" aria-label="Crear nota desde selección">
+  <button type="button" id="selection-action-pill" aria-label="Create note from selection">
     <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
-    <span>Crear nota de selección</span>
+    <span>Create note from selection</span>
   </button>
 
   <!-- Deep Research Modal -->
   <dialog id="research-modal" class="nb-modal" closedby="any" aria-labelledby="research-modal-title">
     <div class="modal-header">
-      <h3 id="research-modal-title">🌐 Deep Research — Investigador Web Autónomo</h3>
-      <button type="button" class="btn-mini" id="close-research-modal">✕ Cerrar</button>
+      <h3 id="research-modal-title">🌐 Deep Research — Autonomous Web Researcher</h3>
+      <button type="button" class="btn-mini" id="close-research-modal">✕ Close</button>
     </div>
     <div style="display:flex; flex-direction:column; gap:12px;">
       <p style="font-size:0.86rem; color:var(--text-secondary);">
-        Busca información en la web y agrégala directamente como una fuente citada en tu cuaderno.
+        Search for information across the web and import it directly as a cited Source in your notebook.
       </p>
       <div style="display:flex; gap:8px;">
-        <input type="text" id="research-topic-input" class="note-title-field" placeholder="Ej: 'Siglo de Oro Español Cervantes'..." />
-        <button type="button" class="btn btn-primary" id="run-research-btn">🔎 Investigar</button>
+        <input type="text" id="research-topic-input" class="note-title-field" placeholder="E.g. 'Spanish Golden Age Cervantes'..." />
+        <button type="button" class="btn btn-primary" id="run-research-btn">🔎 Research</button>
       </div>
       <div id="research-output-preview" class="modal-body" style="background:var(--bg-card); padding:12px; border-radius:10px; min-block-size:150px;">
-        Los hallazgos aparecerán aquí...
+        Research findings will appear here...
       </div>
       <div style="display:flex; justify-content:flex-end;">
-        <button type="button" class="btn btn-primary" id="import-research-btn" disabled>📥 Importar a mis Fuentes</button>
+        <button type="button" class="btn btn-primary" id="import-research-btn" disabled>📥 Import as Source</button>
       </div>
     </div>
   </dialog>
@@ -2312,12 +2312,12 @@
     <div class="modal-header">
       <h3 id="models-manager-title" style="display:flex; align-items:center; gap:8px;">
         <span class="material-symbols-outlined" style="color:var(--accent);">hard_drive</span>
-        <span>Gestión de Modelos en Disco y Memoria GPU</span>
+        <span>Gemma Models Disk & GPU Memory Manager</span>
       </h3>
-      <button type="button" class="btn-mini" id="close-models-manager-modal">✕ Cerrar</button>
+      <button type="button" class="btn-mini" id="close-models-manager-modal">✕ Close</button>
     </div>
     <p style="font-size:0.84rem; color:var(--text-secondary); margin-block-end:12px;">
-      Al cargar un modelo, el anterior se descarga automáticamente de la memoria GPU Metal. Desde aquí también puedes <b>borrar los archivos .gguf del disco</b> para liberar gigabytes o volver a descargarlos con barra de progreso.
+      When loading a model, the previous model is automatically unloaded from Apple Metal GPU VRAM. From here you can also <b>delete .gguf files from disk</b> to free gigabytes, or download them again with live progress.
     </p>
     <div id="models-manager-list" style="display:flex; flex-direction:column; gap:10px; max-block-size:55dvh; overflow-y:auto;"></div>
   </dialog>
@@ -2518,7 +2518,7 @@
       const usedPct = Math.round(usedRatio * 100);
       const freePct = Math.max(0, 100 - usedPct);
 
-      els.contextMeterLabel.textContent = `${ctxLabelK} • ${usedPct}% ocupado (${freePct}% libre)`;
+      els.contextMeterLabel.textContent = `${ctxLabelK} • ${usedPct}% used (${freePct}% free)`;
       els.contextMeterFill.style.inlineSize = `${usedPct}%`;
 
       if (freePct <= 10) {
@@ -2542,16 +2542,16 @@
         const older = state.chatHistory.slice(0, -4);
         const recent = state.chatHistory.slice(-4);
         const digestLines = older.slice(-8).map(m =>
-          `- ${m.role === "user" ? "Usuario" : "Asistente"}: ${(m.content || "").slice(0, 160).trim()}`
+          `- ${m.role === "user" ? "User" : "Assistant"}: ${(m.content || "").slice(0, 160).trim()}`
         );
         state.chatHistory = [
           {
             role: "user",
-            content: `[Resumen compacto de turnos previos (<10% ventana libre)]:\n${digestLines.join("\n")}`
+            content: `[Compact digest of previous turns (<10% free window)]:\n${digestLines.join("\n")}`
           },
           ...recent
         ];
-        showToast("⚡ Contexto compactado automáticamente (<10% libre)");
+        showToast("⚡ Context automatically compacted (<10% free window)");
         updateContextMeterUI();
         return true;
       }
@@ -2568,37 +2568,52 @@
         els.chatAttachImgBtn.disabled = false;
         els.chatAttachImgBtn.style.opacity = "1";
         els.chatAttachImgBtn.style.cursor = "pointer";
-        els.chatAttachImgBtn.title = "Adjuntar archivo o imagen permitida (Modelo Multimodal activo)";
-        els.chatInput.placeholder = "Pregunta sobre tus documentos o imágenes activas...";
+        els.chatAttachImgBtn.title = "Attach file or supported image (Multimodal model active)";
+        els.chatInput.placeholder = "Ask about your active documents or images... (Enter to send, Shift+Enter for new line)";
         els.fileUploadInput.accept = ".pdf,.docx,.epub,.md,.markdown,.txt,.csv,.tsv,.json,.html,.png,.jpg,.jpeg,.webp,.gif,.mp3,.wav,.m4a,.ogg";
-        if (addSourceTitle) addSourceTitle.textContent = "Agregar Fuentes al Cuaderno (Multimodal)";
+        if (addSourceTitle) addSourceTitle.textContent = "Add Sources to Notebook (Multimodal)";
         if (addSourceDesc) {
-          addSourceDesc.innerHTML = "Sube documentos (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>imágenes (.png, .jpg, .webp)</b> para visión con Gemma 4 o <b>audio (.mp3, .wav)</b>.";
+          addSourceDesc.innerHTML = "Upload documents (<b>.pdf, .docx, .epub, .md, .txt, .csv</b>), <b>images (.png, .jpg, .webp)</b> for Gemma 4 vision, or <b>audio (.mp3, .wav)</b>.";
         }
       } else {
         clearAttachedImage();
         els.chatAttachImgBtn.disabled = true;
         els.chatAttachImgBtn.style.opacity = "0.35";
         els.chatAttachImgBtn.style.cursor = "not-allowed";
-        els.chatAttachImgBtn.title = "El modelo actual no es multimodal (solo texto). Selecciona Gemma 4 E2B o 12B para adjuntar imágenes.";
-        els.chatInput.placeholder = "Pregunta sobre tus documentos de texto activos (modelo solo texto)...";
+        els.chatAttachImgBtn.title = "Current model is text-only. Select Gemma 4 E2B or 12B to attach images.";
+        els.chatInput.placeholder = "Ask about your active text documents (text-only model)...";
         els.fileUploadInput.accept = ".pdf,.docx,.epub,.md,.markdown,.txt,.csv,.tsv,.json,.html";
-        if (addSourceTitle) addSourceTitle.textContent = "Agregar Fuentes al Cuaderno (Solo Texto)";
+        if (addSourceTitle) addSourceTitle.textContent = "Add Sources to Notebook (Text Only)";
         if (addSourceDesc) {
-          addSourceDesc.innerHTML = "El modelo actual es de <b>solo texto</b>. Archivos permitidos: <b>.pdf, .docx, .epub, .md, .txt, .csv, .json, .html</b> (imágenes y audio deshabilitados).";
+          addSourceDesc.innerHTML = "Current model is <b>text-only</b>. Allowed files: <b>.pdf, .docx, .epub, .md, .txt, .csv, .json, .html</b> (images and audio disabled).";
         }
       }
     }
 
     // Accessible Custom Confirmation Dialog
-    function showConfirmModal({ title, message, okText = "Aceptar", cancelText = "Cancelar" }) {
+    function showConfirmModal(titleOrConfig, messageArg, okTextArg = "Confirm", cancelTextArg = "Cancel") {
+      let title = "Confirm Action";
+      let message = "Do you wish to continue?";
+      let okText = okTextArg;
+      let cancelText = cancelTextArg;
+
+      if (typeof titleOrConfig === "object" && titleOrConfig !== null) {
+        title = titleOrConfig.title || title;
+        message = titleOrConfig.message || message;
+        okText = titleOrConfig.okText || "Confirm";
+        cancelText = titleOrConfig.cancelText || "Cancel";
+      } else if (typeof titleOrConfig === "string") {
+        title = titleOrConfig;
+        if (messageArg) message = messageArg;
+      }
+
       return new Promise((resolve) => {
         if (!els.confirmModal) {
           resolve(window.confirm(message));
           return;
         }
-        els.confirmModalHeading.textContent = title || "Confirmar Acción";
-        els.confirmModalMessage.textContent = message || "¿Deseas continuar?";
+        els.confirmModalHeading.textContent = title;
+        els.confirmModalMessage.textContent = message;
         els.confirmModalOkBtn.textContent = okText;
         els.confirmModalCancelBtn.textContent = cancelText;
 
@@ -2635,7 +2650,7 @@
       state.models.forEach(m => {
         const opt = document.createElement("option");
         opt.value = m.id;
-        const badge = m.downloaded ? `✓ En Disco (${m.size_on_disk_mb || m.size_label} MB)` : `⬇ Descargar HF (${m.size_label})`;
+        const badge = m.downloaded ? `✓ On Disk (${m.size_on_disk_mb || m.size_label} MB)` : `⬇ Download HF (${m.size_label})`;
         opt.textContent = `${m.name} [${badge}]`;
         if (m.id === state.activeModelId) opt.selected = true;
         els.modelSelect.appendChild(opt);
@@ -2652,14 +2667,14 @@
         card.className = "collection-item-card";
         const isActive = m.id === state.activeModelId && m.active;
         const statusBadge = isActive
-          ? `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c;">⚡ Activo en GPU Metal</span>`
+          ? `<span class="source-counter-pill" style="background:#0f5223; color:#6dd58c;">⚡ Active in Metal GPU</span>`
           : (m.downloaded
-              ? `<span class="collection-file-chip">✓ Guardado en disco (${m.size_on_disk_mb || m.size_label} MB)</span>`
-              : `<span class="collection-file-chip" style="color:var(--accent); font-weight:600;">☁️ Requiere Descarga (${m.size_label})</span>`);
+              ? `<span class="collection-file-chip">✓ Saved on disk (${m.size_on_disk_mb || m.size_label} MB)</span>`
+              : `<span class="collection-file-chip" style="color:var(--accent); font-weight:600;">☁️ Requires Download (${m.size_label})</span>`);
 
         const actionBtnLabel = isActive
-          ? 'Recargar en GPU'
-          : (m.downloaded ? 'Cargar en GPU (Descarga el otro)' : 'Descargar de Hugging Face y Activar');
+          ? 'Reload in GPU'
+          : (m.downloaded ? 'Load in GPU (Unloads active)' : 'Download from Hugging Face & Activate');
 
         card.innerHTML = `
           <div class="collection-item-header">
@@ -2670,7 +2685,7 @@
             ${statusBadge}
           </div>
           <div class="collection-desc">
-            ${m.downloaded ? `Modelo listo en disco. Repositorio: <code>${m.repo_id}</code>` : `<b>El modelo no está en disco</b> (fue borrado o no se descargó). Ocupará aproximadamente ${m.size_label}.`}
+            ${m.downloaded ? `Model ready on disk. Repository: <code>${m.repo_id}</code>` : `<b>Model is not on disk</b> (deleted or not downloaded yet). Download size is approximately ${m.size_label}.`}
           </div>
           <div style="display:flex; justify-content:flex-end; gap:8px; margin-block-start:6px;">
             <button type="button" class="btn btn-primary btn-load-model" data-mid="${m.id}" style="padding:6px 12px; font-size:0.76rem;">
@@ -2680,7 +2695,7 @@
             ${m.downloaded ? `
               <button type="button" class="btn-mini btn-delete-model-disk" data-mid="${m.id}" style="color:var(--danger); border-color:var(--danger);">
                 <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
-                <span>Borrar del disco</span>
+                <span>Delete from disk</span>
               </button>
             ` : ''}
           </div>
@@ -2700,21 +2715,21 @@
           const mid = btn.getAttribute("data-mid");
           const targetObj = state.models.find(m => m.id === mid);
           const confirmed = await showConfirmModal({
-            title: "Borrar Modelo del Disco",
-            message: `¿Estás seguro de que deseas borrar los archivos de '${targetObj ? targetObj.name : mid}' del disco? Se liberará espacio y si vuelves a elegirlo deberás descargarlo de nuevo.`,
-            okText: "Sí, borrar del disco",
-            cancelText: "Cancelar"
+            title: "Delete Model from Disk",
+            message: `Are you sure you want to delete the files for '${targetObj ? targetObj.name : mid}' from disk? This will free space. If selected later, it will need to be downloaded again.`,
+            okText: "Yes, delete from disk",
+            cancelText: "Cancel"
           });
           if (!confirmed) return;
 
           btn.disabled = true;
-          btn.textContent = "Borrando...";
+          btn.textContent = "Deleting...";
           const res = await fetch(`/api/models/delete?model_id=${encodeURIComponent(mid)}`, { method: "DELETE" });
           const data = await res.json();
           if (data.status === "ok") {
             state.models = data.models;
             renderModels();
-            showToast(`🗑️ Modelo '${targetObj ? targetObj.name : mid}' borrado del disco. Ahora figura listo para descargar.`);
+            showToast(`🗑️ Model '${targetObj ? targetObj.name : mid}' deleted from disk. Ready to download.`);
           }
         });
       });
@@ -2731,23 +2746,23 @@
 
       let confirmMsg = "";
       let confirmTitle = "";
-      let confirmOk = "Continuar";
+      let confirmOk = "Continue";
 
       if (targetModel && !targetModel.downloaded) {
-        confirmTitle = "Descargar Modelo de Hugging Face";
-        confirmMsg = `El modelo '${targetModel.name}' no está en disco (${targetModel.size_label}). Se descargará desde Hugging Face y se reemplazará '${currentModel ? currentModel.name : "el modelo activo"}' en la memoria GPU Metal. ¿Deseas iniciar la descarga?`;
-        confirmOk = "Descargar y Activar";
+        confirmTitle = "Download Model from Hugging Face";
+        confirmMsg = `The model '${targetModel.name}' is not on disk (${targetModel.size_label}). It will be downloaded from Hugging Face and will replace '${currentModel ? currentModel.name : "the active model"}' in Apple Metal GPU VRAM. Do you want to start the download?`;
+        confirmOk = "Download and Activate";
       } else {
-        confirmTitle = "Cambiar Modelo en Memoria GPU";
-        confirmMsg = `¿Deseas descargar '${currentModel ? currentModel.name : "el modelo activo"}' de la memoria GPU Metal y cargar en su lugar '${targetModel ? targetModel.name : modelId}'?`;
-        confirmOk = "Cambiar Modelo";
+        confirmTitle = "Switch Model in GPU Memory";
+        confirmMsg = `Do you want to unload '${currentModel ? currentModel.name : "the active model"}' from Metal GPU memory and load '${targetModel ? targetModel.name : modelId}' instead?`;
+        confirmOk = "Switch Model";
       }
 
       const confirmed = await showConfirmModal({
         title: confirmTitle,
         message: confirmMsg,
         okText: confirmOk,
-        cancelText: "Cancelar"
+        cancelText: "Cancel"
       });
 
       if (!confirmed) {
@@ -2763,7 +2778,7 @@
       els.modelSelect.disabled = true;
       els.modelStatusDot.classList.add("downloading");
       els.modelProgressBanner.style.display = "flex";
-      els.modelProgressText.textContent = "Liberando modelo anterior de GPU Metal e iniciando...";
+      els.modelProgressText.textContent = "Unloading previous model from Metal GPU and starting...";
       els.modelProgressPct.textContent = "0%";
       els.modelLinearProgress.indeterminate = true;
 
@@ -2772,7 +2787,7 @@
           const pRes = await fetch("/api/models/progress");
           const pData = await pRes.json();
           if (pData && pData.active) {
-            els.modelProgressText.textContent = pData.status_text || "Descargando de Hugging Face...";
+            els.modelProgressText.textContent = pData.status_text || "Downloading from Hugging Face...";
             els.modelProgressPct.textContent = `${pData.percent || 0}%`;
             if (pData.percent > 0 && pData.percent < 100) {
               els.modelLinearProgress.indeterminate = false;
@@ -2796,7 +2811,7 @@
           state.models = data.models || state.models;
           els.modelLinearProgress.indeterminate = false;
           els.modelLinearProgress.value = 1;
-          els.modelProgressText.textContent = `✓ ${data.name} cargado en GPU Metal`;
+          els.modelProgressText.textContent = `✓ ${data.name} loaded into Metal GPU`;
           els.modelProgressPct.textContent = "100%";
           renderModels();
           setTimeout(() => {
@@ -2823,8 +2838,8 @@
     });
 
     function updateCounters() {
-      els.sourcesTotalBadge.textContent = `${state.sources.length} archivos`;
-      els.activeSourcesPill.textContent = `${state.selectedSources.size} fuentes`;
+      els.sourcesTotalBadge.textContent = `${state.sources.length} files`;
+      els.activeSourcesPill.textContent = `${state.selectedSources.size} sources`;
       if (els.toggleAllSources) {
         const total = state.sources.length;
         const sel = state.selectedSources.size;
@@ -2842,7 +2857,7 @@
         : state.sources;
 
       if (filteredSources.length === 0) {
-        els.sourcesList.innerHTML = `<div style="font-size:0.78rem; color:var(--text-muted); text-align:center; padding:14px;">${q ? "No hay fuentes que coincidan con el filtro." : "Aún no hay fuentes en el cuaderno."}</div>`;
+        els.sourcesList.innerHTML = `<div style="font-size:0.78rem; color:var(--text-muted); text-align:center; padding:14px;">${q ? "No sources match the filter." : "No sources in notebook yet."}</div>`;
         updateCounters();
         return;
       }
@@ -2856,10 +2871,10 @@
           <span class="material-symbols-outlined source-icon" aria-hidden="true">${getFileIconName(src)}</span>
           <span class="source-name" title="${src.name}">${src.name}</span>
           <span class="source-type-tag">${extLabel}</span>
-          <button type="button" class="source-delete-btn" data-del="${src.name}" title="Quitar ${src.name}" aria-label="Quitar ${src.name}">
+          <button type="button" class="source-delete-btn" data-del="${src.name}" title="Remove ${src.name}" aria-label="Remove ${src.name}">
             <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">delete</span>
           </button>
-          <input type="checkbox" class="source-check" data-name="${src.name}" aria-label="Incluir ${src.name} en el Desk" ${isChecked ? "checked" : ""} />
+          <input type="checkbox" class="source-check" data-name="${src.name}" aria-label="Include ${src.name} in Desk" ${isChecked ? "checked" : ""} />
         `;
         row.addEventListener("click", (e) => {
           if (e.target.closest(".source-delete-btn")) {
@@ -2902,7 +2917,7 @@
       const data = await res.json();
       state.notes = data.notes || [];
       renderNotes();
-      showToast("🗑️ Nota eliminada");
+      showToast("🗑️ Note deleted");
     }
 
     async function syncSelectedToBackend() {
@@ -2933,21 +2948,21 @@
     function renderSamples() {
       els.samplesList.innerHTML = "";
       if (!state.samples.length) {
-        els.samplesList.innerHTML = `<div style="grid-column: 1 / -1; font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No hay samples disponibles.</div>`;
+        els.samplesList.innerHTML = `<div style="grid-column: 1 / -1; font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No samples available.</div>`;
         return;
       }
       state.samples.forEach(s => {
         const card = document.createElement("div");
         card.className = "sample-item-card";
         const inWorkspaceBadge = s.is_in_workspace
-          ? `<span style="font-size:0.72rem; color:#34a853; font-weight:600;">✓ En workspace</span>`
+          ? `<span style="font-size:0.72rem; color:#34a853; font-weight:600;">✓ In workspace</span>`
           : "";
         card.innerHTML = `
           <div class="sample-header">
             <span class="material-symbols-outlined" style="font-size:20px; color:var(--accent);">description</span>
             <span class="sample-name" title="${s.filename}">${s.filename}</span>
             <button type="button" class="btn btn-primary btn-load-single-sample" data-file="${s.filename}" style="padding:3px 9px; font-size:0.72rem;">
-              <span class="material-symbols-outlined" style="font-size:15px;">add</span> Cargar
+              <span class="material-symbols-outlined" style="font-size:15px;">add</span> Load
             </button>
           </div>
           <div class="sample-meta">
@@ -2963,7 +2978,7 @@
           const fname = btn.getAttribute("data-file");
           btn.disabled = true;
           const oldText = btn.innerHTML;
-          btn.textContent = "Cargando...";
+          btn.textContent = "Loading...";
           try {
             const res = await fetch("/api/samples/load", {
               method: "POST",
@@ -2989,7 +3004,7 @@
 
     function renderCollections() {
       if (els.collectionsCountBadge) {
-        els.collectionsCountBadge.textContent = `${state.collections.length} temas`;
+        els.collectionsCountBadge.textContent = `${state.collections.length} themes`;
       }
       els.collectionsList.innerHTML = "";
       state.collections.forEach(col => {
@@ -3004,10 +3019,10 @@
             </div>
             <div style="display:flex; gap:6px;">
               <button type="button" class="btn btn-primary btn-load-col" data-col="${col.id}" data-replace="false" style="padding:4px 10px; font-size:0.75rem;">
-                <span class="material-symbols-outlined" style="font-size:16px;">add</span> Cargar
+                <span class="material-symbols-outlined" style="font-size:16px;">add</span> Load
               </button>
-              <button type="button" class="btn btn-load-col" data-col="${col.id}" data-replace="true" style="padding:4px 10px; font-size:0.75rem;" title="Reemplazar el espacio de trabajo con esta colección">
-                <span class="material-symbols-outlined" style="font-size:16px;">swap_horiz</span> Reemplazar
+              <button type="button" class="btn btn-load-col" data-col="${col.id}" data-replace="true" style="padding:4px 10px; font-size:0.75rem;" title="Replace workspace with this collection">
+                <span class="material-symbols-outlined" style="font-size:16px;">swap_horiz</span> Replace
               </button>
             </div>
           </div>
@@ -3023,7 +3038,7 @@
           const replace = btn.getAttribute("data-replace") === "true";
           btn.disabled = true;
           const oldText = btn.innerHTML;
-          btn.textContent = "Cargando...";
+          btn.textContent = "Loading...";
           try {
             const res = await fetch("/api/collections/load", {
               method: "POST",
@@ -3054,7 +3069,7 @@
       state.currentInspectedSource = filename;
       const res = await fetch(`/api/sources/content?name=${encodeURIComponent(filename)}`);
       const data = await res.json();
-      els.sourceModalTitle.textContent = `${filename} (${data.chunks_count} secciones)`;
+      els.sourceModalTitle.textContent = `${filename} (${data.chunks_count} sections)`;
       if (data.media_type === "image" && data.image_data_uri) {
         els.sourceModalBody.innerHTML = `
           <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
@@ -3063,7 +3078,7 @@
           </div>
         `;
       } else {
-        els.sourceModalBody.textContent = data.preview || "Sin contenido.";
+        els.sourceModalBody.textContent = data.preview || "No content.";
       }
       els.sourceModal.showModal();
     }
@@ -3071,7 +3086,7 @@
     function renderNotes() {
       els.notesList.innerHTML = "";
       if (state.notes.length === 0) {
-        els.notesList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No hay notas guardadas todavía. Guarda respuestas del chat o crea una nota nueva.</div>`;
+        els.notesList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:16px;">No saved notes yet. Save chat responses or create a new note.</div>`;
         return;
       }
       state.notes.forEach(note => {
@@ -3082,11 +3097,11 @@
           <div class="note-card-header">
             <span style="font-weight:600;">📌 ${note.title}</span>
             <div style="display:flex; align-items:center; gap:2px;">
-              <button type="button" class="btn-mini btn-convert-note" data-note-id="${note.id}" title="Incorporar esta nota como fuente en el cuaderno" style="padding:2px 6px; font-size:0.68rem;">
+              <button type="button" class="btn-mini btn-convert-note" data-note-id="${note.id}" title="Convert this note into a notebook Source" style="padding:2px 6px; font-size:0.68rem;">
                 <span class="material-symbols-outlined" style="font-size:14px; color:var(--accent);">add_to_photos</span>
-                <span>Fuente</span>
+                <span>Source</span>
               </button>
-              <button type="button" class="source-delete-btn" data-del-note="${note.id}" title="Borrar nota">
+              <button type="button" class="source-delete-btn" data-del-note="${note.id}" title="Delete note">
                 <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
               </button>
             </div>
@@ -3127,12 +3142,12 @@
           state.sources = data.sources || [];
           if (data.source_name) state.selectedSources.add(data.source_name);
           renderSources();
-          showToast(`📄 Nota incorporada como fuente: "${data.source_name}"`);
+          showToast(`📄 Note converted to source: "${data.source_name}"`);
         } else {
-          alert(data.message || "Error al incorporar nota como fuente.");
+          alert(data.message || "Error converting note to source.");
         }
       } catch (err) {
-        alert("Error de conexión al convertir nota: " + err.message);
+        alert("Connection error converting note: " + err.message);
       }
     }
 
@@ -3185,7 +3200,7 @@
         userDiv.appendChild(imgEl);
       }
       const textSpan = document.createElement("span");
-      textSpan.textContent = message || "Analiza esta imagen adjunta.";
+      textSpan.textContent = message || "Analyze this attached image.";
       userDiv.appendChild(textSpan);
       els.chatStream.appendChild(userDiv);
 
@@ -3196,7 +3211,7 @@
       contentDiv.innerHTML = `
         <div class="thinking-box">
           <div class="thinking-dots"><span></span><span></span><span></span></div>
-          <span class="thinking-text">Pensando y analizando fuentes...</span>
+          <span class="thinking-text">Thinking and analyzing sources...</span>
         </div>
       `;
       const actionsDiv = document.createElement("div");
@@ -3220,7 +3235,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: message || "Describe e interpreta detalladamente esta imagen.",
+            message: message || "Describe and interpret this image in detail.",
             action_type: actionType,
             selected: Array.from(state.selectedSources),
             history: state.chatHistory,
@@ -3250,7 +3265,7 @@
           sugContainer.innerHTML = `
             <div class="suggested-prompts-label">
               <span class="material-symbols-outlined" style="font-size:14px; color:var(--accent);">auto_awesome</span>
-              <span>Continuar con</span>
+              <span>Continue with</span>
             </div>
             <div class="suggested-prompts-list"></div>
           `;
@@ -3282,7 +3297,7 @@
         const saveBtn = document.createElement("button");
         saveBtn.type = "button";
         saveBtn.className = "btn-mini";
-        saveBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">push_pin</span> Guardar en Studio`;
+        saveBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">push_pin</span> Save to Studio`;
         saveBtn.addEventListener("click", async () => {
           saveBtn.disabled = true;
           try {
@@ -3292,9 +3307,9 @@
               body: JSON.stringify({ content: (markdown || fullText).slice(0, 800) })
             });
             const titleData = await titleRes.json();
-            const noteTitle = (titleData && titleData.title) ? titleData.title : `Nota_${new Date().toLocaleTimeString("es-AR", { hour12: false }).replace(/:/g, "")}`;
+            const noteTitle = (titleData && titleData.title) ? titleData.title : `Note_${new Date().toLocaleTimeString("en-US", { hour12: false }).replace(/:/g, "")}`;
             await saveNoteToServer(noteTitle, markdown || fullText);
-            showToast(`📌 Nota guardada: "${noteTitle}"`);
+            showToast(`📌 Note saved: "${noteTitle}"`);
           } finally {
             saveBtn.disabled = false;
           }
@@ -3304,11 +3319,11 @@
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.className = "btn-mini";
-        copyBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">content_copy</span> Copiar`;
+        copyBtn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;">content_copy</span> Copy`;
         copyBtn.addEventListener("click", async () => {
           try {
             await navigator.clipboard.writeText(fullText);
-            showToast("📋 Respuesta copiada al portapapeles");
+            showToast("📋 Response copied to clipboard");
           } catch (_) {}
         });
         actionsDiv.appendChild(copyBtn);
@@ -3322,7 +3337,7 @@
         });
 
       } catch (err) {
-        contentDiv.textContent = `Error al generar respuesta: ${err.message}`;
+        contentDiv.textContent = `Error generating response: ${err.message}`;
       } finally {
         els.chatSendBtn.disabled = false;
       }
@@ -3330,7 +3345,7 @@
 
     async function saveNoteToServer(title, content, noteId = null) {
       const payload = {
-        title: title || "Nota de investigación",
+        title: title || "Research Note",
         content: content || "",
       };
       if (noteId) {
@@ -3376,19 +3391,19 @@
           const older = state.chatHistory.slice(0, -2);
           const recent = state.chatHistory.slice(-2);
           const digestLines = older.slice(-8).map(m =>
-            `- ${m.role === "user" ? "Usuario" : "Asistente"}: ${(m.content || "").slice(0, 160).trim()}`
+            `- ${m.role === "user" ? "User" : "Assistant"}: ${(m.content || "").slice(0, 160).trim()}`
           );
           state.chatHistory = [
             {
               role: "user",
-              content: `[Resumen compacto de turnos previos]:\n${digestLines.join("\n")}`
+              content: `[Compact digest of previous turns]:\n${digestLines.join("\n")}`
             },
             ...recent
           ];
           updateContextMeterUI(els.chatInput.value);
-          showToast("⚡ Historial compactado manualmente");
+          showToast("⚡ History compacted manually");
         } else {
-          showToast("✓ Ventana de contexto óptima (se compacta sola al quedar <10%)");
+          showToast("✓ Context window optimal (automatically compacts when <10% free)");
         }
       });
     }
@@ -3408,7 +3423,7 @@
       tile.addEventListener("click", () => {
         const action = tile.getAttribute("data-studio");
         const label = tile.querySelector(".tile-label").textContent;
-        sendChatMessage(`Genera un artefacto de Studio: ${label}`, action);
+        sendChatMessage(`Generate Studio artifact: ${label}`, action);
       });
     });
 
@@ -3493,7 +3508,7 @@
       const res = await fetch("/api/sources/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (data.status === "error") {
-        alert(data.message || "Error al subir el archivo.");
+        alert(data.message || "Error uploading file.");
         els.fileUploadInput.value = "";
         return;
       }
@@ -3510,7 +3525,7 @@
       if (!url) return;
       const btn = document.getElementById("import-url-source-btn");
       btn.disabled = true;
-      btn.textContent = "Importando...";
+      btn.textContent = "Importing...";
       try {
         const res = await fetch("/api/sources/url", {
           method: "POST",
@@ -3527,7 +3542,7 @@
         }
       } finally {
         btn.disabled = false;
-        btn.textContent = "Importar";
+        btn.textContent = "Import";
       }
     });
 
@@ -3539,7 +3554,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: titleEl.value || "Texto_Pegado",
+          title: titleEl.value || "Pasted_Text",
           content: contentEl.value
         })
       });
@@ -3580,7 +3595,7 @@
         els.tabNoteEdit.classList.remove("active");
         els.noteContentInput.style.display = "none";
         els.notePreviewPane.style.display = "block";
-        const content = els.noteContentInput.value || "*Sin contenido*";
+        const content = els.noteContentInput.value || "*No content*";
         els.notePreviewPane.innerHTML = `<div class="msg-content">${renderMarkdownAndCitations(content)}</div>`;
       }
     }
@@ -3605,7 +3620,7 @@
       els.btnSuggestNoteTitle.addEventListener("click", async () => {
         const content = els.noteContentInput.value.trim();
         if (!content) {
-          showToast("Escribe contenido antes de generar título");
+          showToast("Write some content before generating a title");
           return;
         }
         els.btnSuggestNoteTitle.disabled = true;
@@ -3618,7 +3633,7 @@
           const data = await res.json();
           if (data && data.title) {
             els.noteTitleInput.value = data.title;
-            showToast(`✨ Título sugerido: "${data.title}"`);
+            showToast(`✨ Suggested title: "${data.title}"`);
           }
         } finally {
           els.btnSuggestNoteTitle.disabled = false;
@@ -3627,20 +3642,20 @@
     }
 
     document.getElementById("save-note-confirm").addEventListener("click", async () => {
-      const title = els.noteTitleInput.value.trim() || "Nota sin título";
+      const title = els.noteTitleInput.value.trim() || "Untitled Note";
       const content = els.noteContentInput.value;
       await saveNoteToServer(title, content, state.editingNoteId);
       els.noteModal.close();
-      showToast(`💾 Nota guardada: "${title}"`);
+      showToast(`💾 Note saved: "${title}"`);
     });
 
     if (els.btnNewNotebook) {
       els.btnNewNotebook.addEventListener("click", async () => {
         const ok = await showConfirmModal(
-          "¿Crear un nuevo cuaderno?",
-          "Esto iniciará un nuevo cuaderno limpio: se vaciarán las fuentes activas, la conversación y el panel de notas para tu nueva investigación.",
-          "Crear nuevo cuaderno",
-          "Cancelar"
+          "Create a new notebook?",
+          "This will start a fresh notebook: active sources, conversation turns, and notes will be cleared for your new research project.",
+          "Create new notebook",
+          "Cancel"
         );
         if (!ok) return;
 
@@ -3652,11 +3667,11 @@
         state.chatHistory = [];
         els.chatStream.innerHTML = initialOverviewHTML;
         bindSuggestionChips(els.chatStream);
-        els.notebookTitleInput.value = "Cuaderno sin título";
+        els.notebookTitleInput.value = "Untitled Notebook";
         renderSources();
         renderNotes();
         updateContextMeterUI();
-        showToast("✨ Nuevo cuaderno iniciado con notas limpias");
+        showToast("✨ Fresh notebook started");
       });
     }
 
@@ -3667,9 +3682,9 @@
       const prevDesc = ovDesc ? ovDesc.innerHTML : "";
       
       if (ovDesc) {
-        ovDesc.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px; color:var(--text-secondary);"><span class="thinking-spinner" style="inline-size:16px; block-size:16px; border-width:2px;"></span> <em>Analizando fuentes para generar la guía y el título del cuaderno...</em></span>`;
+        ovDesc.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px; color:var(--text-secondary);"><span class="thinking-spinner" style="inline-size:16px; block-size:16px; border-width:2px;"></span> <em>Analyzing sources to generate guide and notebook title...</em></span>`;
       }
-      if (els.notebookTitleInput && (!els.notebookTitleInput.value || els.notebookTitleInput.value === "Cuaderno sin título" || els.notebookTitleInput.value === "Cuaderno de Investigación Local")) {
+      if (els.notebookTitleInput && (!els.notebookTitleInput.value || els.notebookTitleInput.value === "Untitled Notebook" || els.notebookTitleInput.value === "Local Research Notebook" || els.notebookTitleInput.value === "Cuaderno sin título" || els.notebookTitleInput.value === "Cuaderno de Investigación Local")) {
         els.notebookTitleInput.style.opacity = "0.6";
       }
 
@@ -3702,7 +3717,7 @@
     document.getElementById("run-research-btn").addEventListener("click", async () => {
       const topic = els.researchTopicInput.value.trim();
       if (!topic) return;
-      els.researchOutputPreview.textContent = "Investigando fuentes en la web...";
+      els.researchOutputPreview.textContent = "Researching sources across the web...";
       const res = await fetch("/api/research/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3793,13 +3808,13 @@
             body: JSON.stringify({ content: textToSave.slice(0, 800) })
           });
           const data = await res.json();
-          els.noteTitleInput.value = (data && data.title) ? data.title : "Cita seleccionada";
+          els.noteTitleInput.value = (data && data.title) ? data.title : "Selected Excerpt";
         } catch (_) {
-          els.noteTitleInput.value = "Cita seleccionada";
+          els.noteTitleInput.value = "Selected Excerpt";
         }
 
         els.noteModal.showModal();
-        showToast("📝 Texto seleccionado cargado en el editor de notas");
+        showToast("📝 Selected text loaded into note editor");
       });
     }
 
@@ -3808,7 +3823,7 @@
       els.chatStream.innerHTML = initialOverviewHTML;
       bindSuggestionChips(els.chatStream);
       updateContextMeterUI(els.chatInput.value);
-      showToast("✨ Charla reiniciada");
+      showToast("✨ Chat reset");
     });
 
     // Mobile / Tablet Tab Bar Handling

@@ -84,11 +84,11 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     @api.get("/", response_class=HTMLResponse)
     async def index():
         return """<!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DaniBookLM — Daemon de Inferencia Local (:7860)</title>
+  <title>DaniBookLM — Local Inference Daemon (:7860)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -210,22 +210,22 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
   <main class="status-card">
     <div class="badge">
       <span class="badge-dot"></span>
-      Socket de Inferencia Metal Activo
+      Metal Inference Socket Active
     </div>
-    <h1>DaniBookLM — Demonio de Inferencia (:7860)</h1>
+    <h1>DaniBookLM — Inference Daemon (:7860)</h1>
     <p>
-      Este puerto opera como el <strong>socket de backend interno</strong> para cómputo de tensores con <span class="code-pill">llama-cpp-python</span> y Apple Metal GPU.
+      This port operates as the <strong>internal backend socket</strong> for tensor computation with <span class="code-pill">llama-cpp-python</span> and Apple Metal GPU.
     </p>
     <p>
-      Para interactuar con el <strong>Cuaderno de Investigación</strong> (interfaz de usuario, búsqueda FTS5 y chat), ingresa por la puerta de enlace principal:
+      To interact with the <strong>Research Notebook</strong> (user interface, FTS5 search, and multimodal chat), access through the primary gateway:
     </p>
     <a href="http://127.0.0.1:7861" class="btn-gateway">
-      Abrir DaniBookLM (:7861) →
+      Open DaniBookLM (:7861) →
     </a>
     <div class="meta-box">
-      <div>• Socket interno: <span class="code-pill">http://127.0.0.1:7860/api/*</span></div>
-      <div>• Puerta de enlace: <span class="code-pill">http://127.0.0.1:7861</span></div>
-      <div>• Soporte para interfaz directa: <a href="/app" style="color:var(--accent);">/app</a></div>
+      <div>• Internal socket: <span class="code-pill">http://127.0.0.1:7860/api/*</span></div>
+      <div>• Primary gateway: <span class="code-pill">http://127.0.0.1:7861</span></div>
+      <div>• Direct UI fallback: <a href="/app" style="color:var(--accent);">/app</a></div>
     </div>
   </main>
 </body>

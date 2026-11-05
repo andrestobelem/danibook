@@ -11,7 +11,7 @@ class Notebook:
     """Notebook Aggregate Root representing an isolated research session, workspace, and notes."""
 
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
-    title: str = "Cuaderno Sin Título"
+    title: str = "Untitled Notebook"
     created_at: str = field(
         default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat()
     )
@@ -66,10 +66,10 @@ class Notebook:
                 data = json.loads(meta_file.read_text(encoding="utf-8"))
                 return cls(
                     id=data.get("id", root_dir.name),
-                    title=data.get("title", "Cuaderno"),
+                    title=data.get("title", "Untitled Notebook"),
                     created_at=data.get("created_at", datetime.datetime.now(datetime.timezone.utc).isoformat()),
                     base_dir=base_dir,
                 )
             except Exception:
                 pass
-        return cls(id=root_dir.name, title="Cuaderno", base_dir=base_dir)
+        return cls(id=root_dir.name, title="Untitled Notebook", base_dir=base_dir)
