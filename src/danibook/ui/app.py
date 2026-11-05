@@ -83,6 +83,156 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.get("/", response_class=HTMLResponse)
     async def index():
+        return """<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DaniBookLM — Daemon de Inferencia Local (:7860)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #131314;
+      --card: #1e1f20;
+      --border: #37393b;
+      --text: #e3e3e3;
+      --text-muted: #8e918f;
+      --accent: #a8c7fa;
+      --on-accent: #062e6f;
+      --success: #34a853;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafd;
+        --card: #ffffff;
+        --border: #e0e3e7;
+        --text: #1f1f1f;
+        --text-muted: #747775;
+        --accent: #0b57d0;
+        --on-accent: #ffffff;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100dvh;
+      display: grid;
+      place-content: center;
+      padding: 24px;
+    }
+    .status-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 32px;
+      max-width: 540px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: color-mix(in srgb, var(--success) 16%, transparent);
+      color: var(--success);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 1.5s infinite alternate;
+    }
+    @keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }
+    h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .code-pill {
+      font-family: 'JetBrains Mono', monospace;
+      background: color-mix(in srgb, var(--text-muted) 15%, transparent);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      color: var(--text);
+    }
+    .btn-gateway {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--accent);
+      color: var(--on-accent);
+      padding: 13px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-top: 6px;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .btn-gateway:hover {
+      transform: translateY(-2px);
+      opacity: 0.94;
+    }
+    .meta-box {
+      border-top: 1px dashed var(--border);
+      padding-top: 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+  <main class="status-card">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Socket de Inferencia Metal Activo
+    </div>
+    <h1>DaniBookLM — Demonio de Inferencia (:7860)</h1>
+    <p>
+      Este puerto opera como el <strong>socket de backend interno</strong> para cómputo de tensores con <span class="code-pill">llama-cpp-python</span> y Apple Metal GPU.
+    </p>
+    <p>
+      Para interactuar con el <strong>Cuaderno de Investigación</strong> (interfaz de usuario, búsqueda FTS5 y chat), ingresa por la puerta de enlace principal:
+    </p>
+    <a href="http://127.0.0.1:7861" class="btn-gateway">
+      Abrir DaniBookLM (:7861) →
+    </a>
+    <div class="meta-box">
+      <div>• Socket interno: <span class="code-pill">http://127.0.0.1:7860/api/*</span></div>
+      <div>• Puerta de enlace: <span class="code-pill">http://127.0.0.1:7861</span></div>
+      <div>• Soporte para interfaz directa: <a href="/app" style="color:var(--accent);">/app</a></div>
+    </div>
+  </main>
+</body>
+</html>"""
+
+    @api.get("/app", response_class=HTMLResponse)
+    async def direct_app():
         return html_path.read_text(encoding="utf-8")
 
     @api.get("/api/state")
