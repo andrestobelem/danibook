@@ -4335,37 +4335,41 @@
 
     if (els.selectionActionPill) {
       els.selectionActionPill.addEventListener("mousedown", (e) => {
-        // Prevent clearing selection on click
+        // Prevent clearing selection on mousedown
         e.preventDefault();
+        e.stopPropagation();
       });
 
-      els.selectionActionPill.addEventListener("click", async () => {
+      els.selectionActionPill.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (!activeSelectedText) return;
         const textToSave = activeSelectedText;
         els.selectionActionPill.style.display = "none";
         window.getSelection()?.removeAllRanges();
 
-        // Open Note Modal pre-filled
+        // Open Note Modal immediately pre-filled with sensible defaults
         state.editingNoteId = null;
         state.editingNoteOriginalTitle = null;
         els.noteContentInput.value = textToSave;
+        els.noteTitleInput.value = "Selected Excerpt";
         switchToNoteEditTab();
-
-        // Infer concise title from the selected text
-        try {
-          const res = await fetch("/api/notes/generate-title", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: textToSave.slice(0, 800) })
-          });
-          const data = await res.json();
-          els.noteTitleInput.value = (data && data.title) ? data.title : "Selected Excerpt";
-        } catch (_) {
-          els.noteTitleInput.value = "Selected Excerpt";
-        }
-
         els.noteModal.showModal();
         showToast("📝 Selected text loaded into note editor");
+
+        // Infer concise title asynchronously in background without delaying modal display
+        fetch("/api/notes/generate-title", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: textToSave.slice(0, 800) })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.title && els.noteTitleInput.value === "Selected Excerpt") {
+              els.noteTitleInput.value = data.title;
+            }
+          })
+          .catch(() => {});
       });
     }
 
