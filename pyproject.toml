@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "beautifulsoup4>=4.15.0",
+    "ddgs>=9.16.1",
     "duckduckgo-search>=8.1.1",
     "ebooklib>=0.21",
     "gradio>=6.31.0",

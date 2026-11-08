@@ -1,7 +1,10 @@
 from typing import List, Dict
 from pathlib import Path
 from datetime import datetime
-from duckduckgo_search import DDGS
+try:
+    from ddgs import DDGS
+except ImportError:
+    from duckduckgo_search import DDGS
 from ..config import WORKSPACE_DIR
 from ..ingestion.parser import DocumentParser, ParsedDocument
 
@@ -12,22 +15,40 @@ class DeepResearcher:
         self.max_results = max_results
 
     def search_web(self, topic: str) -> List[Dict[str, str]]:
-        """Queries the web for background information, snippets, and source URLs."""
+        """Queries the web for background information, snippets, and source URLs with retry resilience."""
         results = []
-        try:
-            with DDGS() as ddgs:
-                raw_results = list(ddgs.text(topic, max_results=self.max_results))
-                for item in raw_results:
-                    results.append({
-                        "title": item.get("title", "Sin título"),
-                        "snippet": item.get("body", ""),
-                        "url": item.get("href", ""),
-                    })
-        except Exception as e:
-            # Fallback for offline or throttled connection
+        last_error = None
+        # Try multiple query variations/regions if rate-limited or transient empty
+        queries_to_try = [
+            (topic, None),
+            (topic, "wt-wt"),
+            (topic, "es-es"),
+        ]
+
+        for q, reg in queries_to_try:
+            try:
+                with DDGS() as ddgs:
+                    kwargs = {"max_results": self.max_results}
+                    if reg:
+                        kwargs["region"] = reg
+                    raw_results = list(ddgs.text(q, **kwargs))
+                    if raw_results:
+                        for item in raw_results:
+                            results.append({
+                                "title": item.get("title", "Sin título"),
+                                "snippet": item.get("body", ""),
+                                "url": item.get("href", ""),
+                            })
+                        break
+            except Exception as e:
+                last_error = e
+                continue
+
+        if not results:
+            err_msg = str(last_error) if last_error else "No results found"
             results.append({
                 "title": f"Research on: {topic}",
-                "snippet": f"Web search could not be completed at this moment ({e}). You can edit or paste research notes manually.",
+                "snippet": f"Web search could not be completed at this moment ({err_msg}). You can edit or paste research notes manually.",
                 "url": "local://offline",
             })
         return results

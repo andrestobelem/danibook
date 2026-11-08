@@ -236,6 +236,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "ddgs" },
     { name = "duckduckgo-search" },
     { name = "ebooklib" },
     { name = "gradio" },
@@ -251,6 +252,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
+    { name = "ddgs", specifier = ">=9.16.1" },
     { name = "duckduckgo-search", specifier = ">=8.1.1" },
     { name = "ebooklib", specifier = ">=0.21" },
     { name = "gradio", specifier = ">=6.31.0" },
@@ -261,6 +263,20 @@ requires-dist = [
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "pytest-playwright", specifier = ">=0.10.0" },
     { name = "python-docx", specifier = ">=1.2.0" },
+]
+
+[[package]]
+name = "ddgs"
+version = "9.16.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "lxml" },
+    { name = "primp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/c4/165b9b1581813063847349421c014a8ccc346222a58b3233ba168bf257c1/ddgs-9.16.1.tar.gz", hash = "sha256:0cde5682e5801b838915bcb1d12ade8f2e1ec11763b88d0035a1faa0662b517a", size = 38033, upload-time = "2026-10-23T21:16:42.709Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/5f/9388344fe821102459a73d2d49ab5e6769b3bab3f17ecf79fb1f736cf1d6/ddgs-9.16.1-py3-none-any.whl", hash = "sha256:9ac0b3c19d865a9bfbf7bc7cc8090bd43d1e7adfb083a017bbece360a22e21b6", size = 47695, upload-time = "2026-10-23T21:16:41.413Z" },
 ]
 
 [[package]]
