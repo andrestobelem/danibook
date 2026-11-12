@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
+import logging
 import re
 import shutil
 
@@ -14,6 +15,8 @@ from .studio import StudioStore
 from .catalog import CatalogRepository
 from .notebook_entity import Notebook
 from .synthesizer import StudioSynthesizer
+
+logger = logging.getLogger(__name__)
 
 
 class NotebookService:
@@ -91,7 +94,7 @@ class NotebookService:
                         self.sources[parsed.source_file] = parsed
                         self.desk.add_document(parsed)
                     except Exception:
-                        pass
+                        logger.warning("Failed to sync source '%s' into Desk/Archive", file_path.name, exc_info=True)
 
     def _register_parsed_source(self, parsed: ParsedDocument) -> str:
         self.sources[parsed.source_file] = parsed
@@ -103,6 +106,64 @@ class NotebookService:
     def is_active_model_multimodal(self) -> bool:
         """Returns True if the currently active model preset supports multimodal vision/media."""
         return bool(self.engine.preset.supports_vision)
+
+    def get_desk_sources(self) -> List[str]:
+        """Returns the list of Source names currently active in the Desk (Tier 1)."""
+        return self.desk.get_active_files()
+
+    def get_models_state(self) -> Dict[str, Any]:
+        """Returns the status of all configured models and the active model state."""
+        return {
+            "models": self.engine.get_models_status(),
+            "active_model_id": self.engine.active_model_id,
+            "is_model_loaded": self.engine.is_model_loaded,
+            "vision_enabled": self.is_active_model_multimodal,
+            "download_state": self.engine.download_state,
+        }
+
+    def get_model_download_progress(self) -> Dict[str, Any]:
+        """Returns the current model download progress state."""
+        return self.engine.download_state
+
+    def select_model(self, model_id: str, auto_download: bool = True) -> Dict[str, Any]:
+        """Switches the active LLM model, downloading it if needed, and returns updated state."""
+        info = self.engine.switch_model(model_id, auto_download=auto_download)
+        return {
+            **info,
+            "active_model_id": self.engine.active_model_id,
+            "is_model_loaded": self.engine.is_model_loaded,
+            "vision_enabled": self.is_active_model_multimodal,
+            "models": self.engine.get_models_status(),
+        }
+
+    def delete_model(self, model_id: str) -> Dict[str, Any]:
+        """Deletes a downloaded model from disk."""
+        return self.engine.delete_model_from_disk(model_id)
+
+    def unload_model(self) -> Dict[str, Any]:
+        """Unloads the active model from Metal VRAM."""
+        self.engine.unload_active_model()
+        return {
+            "models": self.engine.get_models_status(),
+            "active_model_id": self.engine.active_model_id,
+            "is_model_loaded": self.engine.is_model_loaded,
+        }
+
+    def get_notebook_state(self) -> Dict[str, Any]:
+        """Returns the complete Notebook state snapshot for the UI."""
+        return {
+            "notebook_id": self.notebook_id,
+            "notebook_title": self.notebook_title,
+            "sources": self.get_sources_list(),
+            "selected": self.get_desk_sources(),
+            "notes": self.get_notes_list(),
+            "models": self.engine.get_models_status(),
+            "active_model_id": self.engine.active_model_id,
+            "is_model_loaded": self.engine.is_model_loaded,
+            "vision_enabled": self.is_active_model_multimodal,
+            "collections": self.get_collections_list(),
+            "samples": self.get_samples_list(),
+        }
 
     def ingest_file_bytes(self, filename: str, content: bytes) -> str:
         """Writes raw bytes into the Notebook workspace, parses the Source, and indexes it into Desk and Archive."""
@@ -200,8 +261,8 @@ class NotebookService:
     def get_collections_list(self) -> List[Dict]:
         return self.catalog.list_collections()
 
-    def load_collection(self, collection_id: str, replace_existing: bool = False) -> List[str]:
-        src_files = self.catalog.resolve_collection_files(collection_id)
+    def _copy_and_register_sources(self, src_files: List[Path], replace_existing: bool = False) -> List[str]:
+        """Copies resolved catalog files into the Notebook workspace, parses, and registers them."""
         if replace_existing:
             self.clear_all_sources()
 
@@ -213,21 +274,16 @@ class NotebookService:
             imported.append(self._register_parsed_source(parsed))
         return imported
 
+    def load_collection(self, collection_id: str, replace_existing: bool = False) -> List[str]:
+        src_files = self.catalog.resolve_collection_files(collection_id)
+        return self._copy_and_register_sources(src_files, replace_existing=replace_existing)
+
     def get_samples_list(self) -> List[Dict]:
         return self.catalog.list_samples(set(self.sources.keys()))
 
     def load_samples(self, filenames: List[str], replace_existing: bool = False) -> List[str]:
         src_files = self.catalog.resolve_sample_files(filenames)
-        if replace_existing:
-            self.clear_all_sources()
-
-        imported = []
-        for src in src_files:
-            dest = self.workspace_dir / src.name
-            shutil.copy2(src, dest)
-            parsed = DocumentParser.parse(dest)
-            imported.append(self._register_parsed_source(parsed))
-        return imported
+        return self._copy_and_register_sources(src_files, replace_existing=replace_existing)
 
     def get_notes_list(self) -> List[Dict]:
         return self.studio.list_notes()

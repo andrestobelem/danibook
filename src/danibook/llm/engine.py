@@ -1,12 +1,15 @@
 from pathlib import Path
 from typing import Iterator, Optional, List, Dict, Any
 import gc
+import logging
 import re
 import threading
 from ..config import DEFAULT_MODEL_ID, GEMMA_MODELS, MODELS_DIR, CACHE_DIR, ModelPreset
 from .prompts import NAMING_NOTE_PROMPT, NAMING_NOTEBOOK_PROMPT, SOURCES_OVERVIEW_PROMPT
 from .lifecycle import ModelLifecycleManager
 from .context import ContextBudgetManager
+
+logger = logging.getLogger(__name__)
 
 
 class LLMEngine:
@@ -292,7 +295,7 @@ class LLMEngine:
                 if 1 <= len(words) <= 8:
                     return " ".join(words)
             except Exception:
-                pass
+                logger.warning("Failed to generate note title via LLM, using heuristic fallback", exc_info=True)
         words = [w for w in re.sub(r"[^\w\s]", "", text).split() if len(w) > 2]
         return " ".join(words[:4]).title() if words else "Research Note"
 
@@ -330,7 +333,7 @@ class LLMEngine:
                 if raw_ov:
                     overview = raw_ov
             except Exception:
-                pass
+                logger.warning("Failed to generate notebook overview via LLM, using default", exc_info=True)
 
             try:
                 title_resp = self._llm.create_chat_completion(
@@ -345,7 +348,7 @@ class LLMEngine:
                 if cleaned:
                     title = cleaned
             except Exception:
-                pass
+                logger.warning("Failed to generate notebook title via LLM, using default", exc_info=True)
 
         return {
             "title": title,

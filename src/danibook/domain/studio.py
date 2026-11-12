@@ -1,9 +1,12 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 import json
+import logging
 import re
 import uuid
 from ..config import NOTES_DIR
+
+logger = logging.getLogger(__name__)
 
 
 class StudioStore:
@@ -63,6 +66,7 @@ class StudioStore:
             try:
                 notes.append(self._parse_note_file(path))
             except Exception:
+                logger.warning("Failed to parse Studio Note file '%s'", path.name, exc_info=True)
                 continue
         return notes
 

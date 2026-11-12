@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
-import { join } from "path";
-import { existsSync, readFileSync } from "fs";
+import { join, resolve, sep } from "path";
+import { existsSync } from "fs";
 
 const PORT = 7861;
 const PYTHON_BACKEND = "http://127.0.0.1:7860";
@@ -77,22 +77,24 @@ const server = Bun.serve({
       }
     }
 
-    // 4. Serve vendor JS assets
+    // 4. Serve vendor JS assets safely (prevent path traversal)
     if (url.pathname.startsWith("/vendor/")) {
-      const fileName = url.pathname.replace("/vendor/", "");
-      const vendorPath = join(process.cwd(), "src", "danibook", "ui", "vendor", fileName);
-      if (existsSync(vendorPath)) {
-        return new Response(readFileSync(vendorPath), {
+      const vendorDir = resolve(process.cwd(), "src", "danibook", "ui", "vendor");
+      const fileName = url.pathname.slice("/vendor/".length);
+      const vendorPath = resolve(vendorDir, fileName);
+      if (vendorPath.startsWith(vendorDir + sep) && existsSync(vendorPath)) {
+        return new Response(Bun.file(vendorPath), {
           headers: { "Content-Type": "application/javascript; charset=utf-8" },
         });
       }
+      return new Response("Not Found", { status: 404 });
     }
 
     // 5. Serve NotebookLM Material 3 static web application
     if (url.pathname === "/" || url.pathname === "/notebooklm.html") {
       const htmlPath = join(process.cwd(), "src", "danibook", "ui", "notebooklm.html");
       if (existsSync(htmlPath)) {
-        return new Response(readFileSync(htmlPath), {
+        return new Response(Bun.file(htmlPath), {
           headers: { "Content-Type": "text/html; charset=utf-8" },
         });
       }

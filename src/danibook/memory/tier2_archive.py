@@ -1,9 +1,12 @@
 from typing import List, Dict, Tuple, Optional
+import logging
 import re
 import sqlite3
 from pathlib import Path
 from ..ingestion.parser import ParsedDocument, DocumentChunk
 from ..config import CACHE_DIR
+
+logger = logging.getLogger(__name__)
 
 
 class ArchiveMemory:
@@ -142,6 +145,7 @@ class ArchiveMemory:
                 results.append((chunk, float(row[4] or 1.0)))
             return results
         except Exception:
+            logger.warning("Archive FTS5 search failed for query=%r", query, exc_info=True)
             return []
 
     def format_search_context(self, query: str, top_k: int = 4, max_chunk_chars: int = 2500) -> str:

@@ -1,12 +1,16 @@
 from pathlib import Path
 from typing import List, Dict, Optional
+import logging
 import uvicorn
-from fastapi import FastAPI, UploadFile, File, Query
+from fastapi import FastAPI, Request, UploadFile, File, Query
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
 from ..domain.notebook import NotebookService
+
+logger = logging.getLogger(__name__)
 
 
 class SelectSourcesPayload(BaseModel):
@@ -80,6 +84,21 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     ui_dir = Path(__file__).parent
     html_path = ui_dir / "notebooklm.html"
     api.mount("/vendor", StaticFiles(directory=str(ui_dir / "vendor")), name="vendor")
+
+    @api.exception_handler(ValueError)
+    async def value_error_handler(request: Request, exc: ValueError):
+        logger.warning("Validation error on %s %s: %s", request.method, request.url.path, exc)
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(exc)})
+
+    @api.exception_handler(FileNotFoundError)
+    async def not_found_handler(request: Request, exc: FileNotFoundError):
+        logger.warning("Resource not found on %s %s: %s", request.method, request.url.path, exc)
+        return JSONResponse(status_code=404, content={"status": "error", "message": str(exc)})
+
+    @api.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(exc)})
 
     @api.get("/", response_class=HTMLResponse)
     async def index():
@@ -237,19 +256,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.get("/api/state")
     async def get_state():
-        return {
-            "notebook_id": service.notebook_id,
-            "notebook_title": service.notebook_title,
-            "sources": service.get_sources_list(),
-            "selected": service.desk.get_active_files(),
-            "notes": service.get_notes_list(),
-            "models": service.engine.get_models_status(),
-            "active_model_id": service.engine.active_model_id,
-            "is_model_loaded": service.engine.is_model_loaded,
-            "vision_enabled": service.engine._vision_enabled,
-            "collections": service.get_collections_list(),
-            "samples": service.get_samples_list(),
-        }
+        return service.get_notebook_state()
 
     @api.get("/api/samples")
     async def get_samples():
@@ -257,16 +264,15 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.post("/api/samples/load")
     async def load_samples_endpoint(payload: LoadSamplesPayload):
-        try:
-            imported = service.load_samples(payload.filenames, replace_existing=payload.replace_existing)
-            return {
-                "status": "ok",
-                "imported": imported,
-                "sources": service.get_sources_list(),
-                "selected": service.desk.get_active_files(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        imported = await run_in_threadpool(
+            service.load_samples, payload.filenames, replace_existing=payload.replace_existing
+        )
+        return {
+            "status": "ok",
+            "imported": imported,
+            "sources": service.get_sources_list(),
+            "selected": service.get_desk_sources(),
+        }
 
     @api.get("/api/collections")
     async def get_collections():
@@ -274,68 +280,43 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.post("/api/collections/load")
     async def load_collection_endpoint(payload: LoadCollectionPayload):
-        try:
-            imported = service.load_collection(payload.collection_id, replace_existing=payload.replace_existing)
-            return {
-                "status": "ok",
-                "imported": imported,
-                "sources": service.get_sources_list(),
-                "selected": service.desk.get_active_files(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        imported = await run_in_threadpool(
+            service.load_collection, payload.collection_id, replace_existing=payload.replace_existing
+        )
+        return {
+            "status": "ok",
+            "imported": imported,
+            "sources": service.get_sources_list(),
+            "selected": service.get_desk_sources(),
+        }
 
     @api.get("/api/models")
     async def get_models():
-        return {
-            "models": service.engine.get_models_status(),
-            "active_model_id": service.engine.active_model_id,
-            "is_model_loaded": service.engine.is_model_loaded,
-            "vision_enabled": service.engine._vision_enabled,
-            "download_state": service.engine.download_state,
-        }
+        return service.get_models_state()
 
     @api.get("/api/models/progress")
     async def get_models_progress():
-        return service.engine.download_state
+        return service.get_model_download_progress()
 
     @api.post("/api/models/select")
     async def select_model(payload: SwitchModelPayload):
-        try:
-            from starlette.concurrency import run_in_threadpool
-            info = await run_in_threadpool(service.engine.switch_model, payload.model_id, auto_download=True)
-            return {
-                "status": "ok",
-                **info,
-                "active_model_id": service.engine.active_model_id,
-                "is_model_loaded": service.engine.is_model_loaded,
-                "models": service.engine.get_models_status(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        info = await run_in_threadpool(service.select_model, payload.model_id, auto_download=True)
+        return {"status": "ok", **info}
 
     @api.delete("/api/models/delete")
     async def delete_model(model_id: str = Query(...)):
-        try:
-            res = service.engine.delete_model_from_disk(model_id)
-            return {"status": "ok", **res}
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        res = service.delete_model(model_id)
+        return {"status": "ok", **res}
 
     @api.post("/api/models/unload")
     async def unload_model():
-        service.engine.unload_active_model()
-        return {
-            "status": "ok",
-            "models": service.engine.get_models_status(),
-            "active_model_id": service.engine.active_model_id,
-            "is_model_loaded": service.engine.is_model_loaded,
-        }
+        res = service.unload_model()
+        return {"status": "ok", **res}
 
     @api.post("/api/sources/select")
     async def select_sources(payload: SelectSourcesPayload):
         service.sync_selected(payload.selected)
-        return {"status": "ok", "selected": service.desk.get_active_files()}
+        return {"status": "ok", "selected": service.get_desk_sources()}
 
     @api.get("/api/sources/content")
     async def get_source_content(name: str = Query(...)):
@@ -343,31 +324,25 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.post("/api/sources/upload")
     async def upload_sources(files: List[UploadFile] = File(...)):
-        try:
-            uploaded_names = []
-            for f in files:
-                content = await f.read()
-                name = service.ingest_file_bytes(f.filename, content)
-                uploaded_names.append(name)
-            return {
-                "status": "ok",
-                "uploaded": uploaded_names,
-                "sources": service.get_sources_list(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        uploaded_names = []
+        for f in files:
+            content = await f.read()
+            name = await run_in_threadpool(service.ingest_file_bytes, f.filename, content)
+            uploaded_names.append(name)
+        return {
+            "status": "ok",
+            "uploaded": uploaded_names,
+            "sources": service.get_sources_list(),
+        }
 
     @api.post("/api/sources/url")
     async def add_url_source(payload: AddUrlSourcePayload):
-        try:
-            imported = service.ingest_url(payload.url)
-            return {
-                "status": "ok",
-                "imported": imported,
-                "sources": service.get_sources_list(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+        imported = await run_in_threadpool(service.ingest_url, payload.url)
+        return {
+            "status": "ok",
+            "imported": imported,
+            "sources": service.get_sources_list(),
+        }
 
     @api.post("/api/notebook/new")
     async def new_notebook():
@@ -376,7 +351,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.post("/api/sources/paste")
     async def add_pasted_source(payload: AddPastedTextPayload):
-        imported = service.ingest_pasted_text(payload.title, payload.content)
+        imported = await run_in_threadpool(service.ingest_pasted_text, payload.title, payload.content)
         return {
             "status": "ok",
             "imported": imported,
@@ -389,7 +364,7 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
         return {
             "deleted": name,
             "sources": service.get_sources_list(),
-            "selected": service.desk.get_active_files(),
+            "selected": service.get_desk_sources(),
         }
 
     @api.delete("/api/notes/delete")
@@ -404,13 +379,17 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     @api.post("/api/chat/stream")
     async def chat_stream(payload: ChatStreamPayload):
         def token_generator():
-            yield from service.stream_synthesis(
-                message=payload.message,
-                action_type=payload.action_type,
-                selected=payload.selected,
-                history=payload.history,
-                image_uri=payload.image_uri,
-            )
+            try:
+                yield from service.stream_synthesis(
+                    message=payload.message,
+                    action_type=payload.action_type,
+                    selected=payload.selected,
+                    history=payload.history,
+                    image_uri=payload.image_uri,
+                )
+            except Exception as exc:
+                logger.exception("Error during chat_stream synthesis")
+                yield f"\n\n⚠️ Error de síntesis: {exc}"
 
         return StreamingResponse(token_generator(), media_type="text/plain; charset=utf-8")
 
@@ -421,38 +400,35 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
     @api.post("/api/notes/generate-title")
     async def generate_note_title_endpoint(payload: GenerateNoteTitlePayload):
-        title = service.generate_note_title(payload.content)
+        title = await run_in_threadpool(service.generate_note_title, payload.content)
         return {"status": "ok", "title": title}
 
     @api.post("/api/notes/convert-to-source")
     async def convert_note_to_source(payload: ConvertNoteToSourcePayload):
         target = payload.id or payload.title
         if not target:
-            return JSONResponse(status_code=400, content={"status": "error", "message": "id or title is required"})
-        try:
-            source_name = service.convert_note_to_source(target)
-            return {
-                "status": "ok",
-                "source_name": source_name,
-                "sources": service.get_sources_list(),
-                "selected": service.desk.get_active_files(),
-            }
-        except Exception as e:
-            return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+            raise ValueError("id or title is required")
+        source_name = await run_in_threadpool(service.convert_note_to_source, target)
+        return {
+            "status": "ok",
+            "source_name": source_name,
+            "sources": service.get_sources_list(),
+            "selected": service.get_desk_sources(),
+        }
 
     @api.post("/api/notebook/overview")
     async def generate_notebook_overview_endpoint():
-        res = service.generate_notebook_overview()
+        res = await run_in_threadpool(service.generate_notebook_overview)
         return {"status": "ok", **res}
 
     @api.post("/api/research/run")
     async def run_research(payload: ResearchRunPayload):
-        dossier = service.run_deep_research(payload.topic)
+        dossier = await run_in_threadpool(service.run_deep_research, payload.topic)
         return {"dossier": dossier}
 
     @api.post("/api/research/import")
     async def import_research(payload: ResearchImportPayload):
-        imported = service.import_deep_research(payload.topic, payload.dossier)
+        imported = await run_in_threadpool(service.import_deep_research, payload.topic, payload.dossier)
         return {
             "imported": imported,
             "sources": service.get_sources_list(),
@@ -462,6 +438,10 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
 
 
 def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
     api = create_fastapi_app()
     uvicorn.run(api, host="127.0.0.1", port=7860, log_level="info")
 
