@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 import json
+import logging
 from .parser import DocumentParser, ParsedDocument
+
+logger = logging.getLogger(__name__)
 
 class FolderWatcher:
     """Monitors a local folder and incrementally parses new or changed documents based on SHA-256."""
@@ -20,6 +23,7 @@ class FolderWatcher:
                 with open(self.state_file, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception:
+                logger.warning("Failed to load watcher state from '%s'", self.state_file, exc_info=True)
                 return {}
         return {}
 
@@ -28,7 +32,7 @@ class FolderWatcher:
             with open(self.state_file, "w", encoding="utf-8") as f:
                 json.dump(self.file_hashes, f, indent=2)
         except Exception:
-            pass
+            logger.warning("Failed to save watcher state to '%s'", self.state_file, exc_info=True)
 
     def scan(self) -> List[ParsedDocument]:
         """Scans the folder and returns parsed documents for newly added or modified files."""

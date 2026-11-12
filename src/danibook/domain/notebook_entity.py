@@ -3,7 +3,10 @@ from pathlib import Path
 from typing import Optional, Dict
 import datetime
 import json
+import logging
 import uuid
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -71,5 +74,5 @@ class Notebook:
                     base_dir=base_dir,
                 )
             except Exception:
-                pass
+                logger.warning("Failed to parse notebook metadata at '%s'", meta_file, exc_info=True)
         return cls(id=root_dir.name, title="Untitled Notebook", base_dir=base_dir)

@@ -1,5 +1,8 @@
 from typing import List, Dict, Tuple, Optional, Any
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 
 class ContextBudgetManager:
@@ -19,7 +22,7 @@ class ContextBudgetManager:
             try:
                 return self._tokenizer_fn(text)
             except Exception:
-                pass
+                logger.debug("Tokenizer function failed, using char-length fallback", exc_info=True)
         return max(1, int(len(text) / 2.5))
 
     def clamp_to_token_budget(self, text: str, max_allowed_tokens: int) -> str:
