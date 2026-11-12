@@ -1,21 +1,32 @@
 import { Database } from "bun:sqlite";
 import { join, resolve, sep } from "path";
-import { existsSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 
 const PORT = 7861;
 const PYTHON_BACKEND = "http://127.0.0.1:7860";
-const DB_PATH = join(process.cwd(), "data", "danibook_fts.db");
+const DATA_DIR = process.env.DANIBOOK_DATA_DIR || join(process.cwd(), "data");
+const CACHE_DIR = join(DATA_DIR, "cache");
+mkdirSync(CACHE_DIR, { recursive: true });
+const DB_PATH = join(CACHE_DIR, "archive_fts5.sqlite");
 
-// Initialize native SQLite with FTS5 for ultra-fast document search
+// Open the shared ArchiveMemory SQLite FTS5 index (same schema & tokenizer as Python)
 const db = new Database(DB_PATH);
+db.run("PRAGMA busy_timeout = 3000;");
 db.run(`
-  CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks USING fts5(
+  CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
     source_file,
-    chunk_index UNINDEXED,
     content,
-    tokenize = 'porter unicode61'
+    page_number UNINDEXED,
+    section_title UNINDEXED,
+    tokenize = 'unicode61 remove_diacritics 2'
   );
 `);
+
+function buildFtsQuery(raw: string): string {
+  const tokens = (raw.toLowerCase().match(/[\p{L}\p{N}_]+/gu) || []).filter((t) => t.length >= 2);
+  if (tokens.length === 0) return "";
+  return tokens.slice(0, 12).map((t) => `"${t}"`).join(" OR ");
+}
 
 console.log(`⚡ Bun Core Server v${Bun.version} initializing on port ${PORT}...`);
 
@@ -34,28 +45,38 @@ const server = Bun.serve({
       });
     }
 
-    // 2. Ultra-fast Native FTS5 Search Benchmark Endpoint
+    // 2. Ultra-fast Native FTS5 Search Endpoint (shared ArchiveMemory index)
     if (url.pathname === "/api/fts/search") {
       const q = url.searchParams.get("q") || "";
-      if (!q.trim()) return Response.json({ results: [] });
+      const ftsQuery = buildFtsQuery(q);
+      if (!ftsQuery) return Response.json({ query: q, count: 0, results: [] });
 
-      const startTime = performance.now();
-      const stmt = db.query(`
-        SELECT source_file, chunk_index, snippet(document_chunks, 2, '<b>', '</b>', '...', 24) as snippet, rank
-        FROM document_chunks
-        WHERE document_chunks MATCH ?
-        ORDER BY rank
-        LIMIT 10;
-      `);
-      const results = stmt.all(q);
-      const latencyMs = (performance.now() - startTime).toFixed(3);
+      try {
+        const startTime = performance.now();
+        const stmt = db.query(`
+          SELECT
+            source_file,
+            page_number,
+            section_title,
+            snippet(chunks_fts, 1, '<b>', '</b>', '...', 24) as snippet,
+            -bm25(chunks_fts) as score
+          FROM chunks_fts
+          WHERE chunks_fts MATCH ?
+          ORDER BY bm25(chunks_fts)
+          LIMIT 10;
+        `);
+        const results = stmt.all(ftsQuery);
+        const latencyMs = (performance.now() - startTime).toFixed(3);
 
-      return Response.json({
-        query: q,
-        latency_ms: latencyMs,
-        count: results.length,
-        results,
-      });
+        return Response.json({
+          query: q,
+          latency_ms: latencyMs,
+          count: results.length,
+          results,
+        });
+      } catch (err: any) {
+        return Response.json({ error: "FTS5 search failed", details: err.message }, { status: 500 });
+      }
     }
 
     // 3. Reverse-proxy SSE streams and API endpoints directly to the Metal-backed engine
