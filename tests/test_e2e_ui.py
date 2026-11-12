@@ -162,4 +162,26 @@ def test_e2e_mindmap_flashcards_and_markdown_export(page: Page, live_server, mon
         page.locator("#btn-export-download-md").click()
     download = download_info.value
     assert download.suggested_filename.endswith(".md")
+    expect(page.locator("#export-notebook-modal")).to_be_hidden()
+
+    # 4. Multi-Notebook create & switch isolation
+    nb_select = page.locator("#notebook-select")
+    expect(nb_select).to_have_value("default")
+
+    page.locator("#btn-new-notebook").click()
+    page.locator("#confirm-modal-ok-btn").click()
+    expect(nb_select).not_to_have_value("default")
+    created_id = nb_select.input_value()
+
+    page.locator("#btn-open-add-source").click()
+    page.locator("#paste-source-title").fill("Isolated_Source")
+    page.locator("#paste-source-content").fill("Solo en el segundo cuaderno.")
+    page.locator("#save-paste-source-btn").click()
+    expect(page.locator("#sources-list")).to_contain_text("Isolated_Source.md")
+
+    nb_select.select_option("default")
+    expect(page.locator("#sources-list")).not_to_contain_text("Isolated_Source.md")
+
+    nb_select.select_option(created_id)
+    expect(page.locator("#sources-list")).to_contain_text("Isolated_Source.md")
 

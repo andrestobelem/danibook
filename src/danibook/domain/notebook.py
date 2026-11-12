@@ -32,18 +32,25 @@ class NotebookService:
         desk: Optional[DeskMemory] = None,
         archive: Optional[ArchiveMemory] = None,
         active_notebook: Optional[Notebook] = None,
+        notebooks_dir: Optional[Path] = None,
     ):
         self.active_notebook = active_notebook or Notebook(
             id="default",
             title="Main Notebook",
         )
-        # If default dirs are passed, bind them to workspace_dir and notes_dir
-        self.workspace_dir = Path(workspace_dir).resolve()
+        self._default_workspace_dir = Path(workspace_dir).resolve()
+        self._default_notes_dir = Path(notes_dir).resolve()
+        self.notebooks_dir = (
+            Path(notebooks_dir).resolve()
+            if notebooks_dir is not None
+            else (self._default_workspace_dir.parent / "notebooks").resolve()
+        )
+        self.workspace_dir = self._default_workspace_dir
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
         self.watcher = FolderWatcher(self.workspace_dir)
         self.desk = desk or DeskMemory()
         self.archive = archive or ArchiveMemory()
-        self.studio = StudioStore(notes_dir)
+        self.studio = StudioStore(self._default_notes_dir)
         self.catalog = CatalogRepository(collections_dir, samples_dir)
         self.researcher = DeepResearcher(max_results=5)
         self.engine = engine or LLMEngine(
@@ -65,13 +72,69 @@ class NotebookService:
     def switch_notebook(self, notebook: Notebook) -> None:
         """Switches the active Notebook aggregate, updating workspace and notes paths."""
         self.active_notebook = notebook
-        self.active_notebook.ensure_directories()
-        self.workspace_dir = self.active_notebook.workspace_dir
+        if notebook.id == "default" and notebook.base_dir is None:
+            self.workspace_dir = self._default_workspace_dir
+            self.workspace_dir.mkdir(parents=True, exist_ok=True)
+            notes_target = self._default_notes_dir
+        else:
+            self.active_notebook.ensure_directories()
+            self.workspace_dir = self.active_notebook.workspace_dir
+            notes_target = self.active_notebook.notes_dir
         self.watcher = FolderWatcher(self.workspace_dir)
-        self.studio.set_notes_dir(self.active_notebook.notes_dir)
+        self.studio.set_notes_dir(notes_target)
         self.desk.clear()
         self.sources.clear()
         self.initial_sync()
+
+    def list_notebooks(self) -> List[Dict[str, str]]:
+        """Returns metadata for the default Notebook and all persisted Notebooks."""
+        notebooks: List[Dict[str, str]] = [
+            {
+                "id": "default",
+                "title": self.active_notebook.title if self.active_notebook.id == "default" else "Main Notebook",
+                "created_at": "",
+            }
+        ]
+        if self.notebooks_dir.exists():
+            base_dir = self.notebooks_dir.parent
+            for entry in sorted(self.notebooks_dir.iterdir(), key=lambda p: p.name):
+                if entry.is_dir() and not entry.name.startswith(".") and entry.name != "default":
+                    nb = Notebook.load_from_dir(entry, base_dir=base_dir)
+                    notebooks.append(nb.to_dict())
+        return notebooks
+
+    def create_notebook(self, title: str = "Untitled Notebook") -> Dict[str, Any]:
+        """Creates a new isolated Notebook, switches to it, and returns the updated state."""
+        clean_title = title.strip() or "Untitled Notebook"
+        nb = Notebook(title=clean_title, base_dir=self.notebooks_dir.parent)
+        self.switch_notebook(nb)
+        return self.get_notebook_state()
+
+    def switch_notebook_by_id(self, notebook_id: str) -> Dict[str, Any]:
+        """Switches to an existing Notebook by ID and returns the updated state."""
+        if notebook_id == "default":
+            self.switch_notebook(Notebook(id="default", title="Main Notebook"))
+            return self.get_notebook_state()
+
+        target_dir = (self.notebooks_dir / notebook_id).resolve()
+        if target_dir.parent != self.notebooks_dir or not target_dir.is_dir():
+            raise FileNotFoundError(f"Notebook not found: {notebook_id}")
+
+        nb = Notebook.load_from_dir(target_dir, base_dir=self.notebooks_dir.parent)
+        self.switch_notebook(nb)
+        return self.get_notebook_state()
+
+    def rename_notebook(self, title: str) -> Dict[str, Any]:
+        """Renames the currently active Notebook and persists metadata when applicable."""
+        clean_title = title.strip() or "Untitled Notebook"
+        self.active_notebook.title = clean_title
+        if self.active_notebook.id != "default":
+            self.active_notebook.save_metadata()
+        return {
+            "notebook_id": self.notebook_id,
+            "notebook_title": self.notebook_title,
+            "notebooks": self.list_notebooks(),
+        }
 
     @property
     def all_documents(self) -> Dict[str, ParsedDocument]:
@@ -172,6 +235,7 @@ class NotebookService:
         return {
             "notebook_id": self.notebook_id,
             "notebook_title": self.notebook_title,
+            "notebooks": self.list_notebooks(),
             "sources": self.get_sources_list(),
             "selected": self.get_desk_sources(),
             "notes": self.get_notes_list(),

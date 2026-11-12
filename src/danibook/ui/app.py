@@ -73,6 +73,18 @@ class LoadSamplesPayload(BaseModel):
     replace_existing: bool = False
 
 
+class CreateNotebookPayload(BaseModel):
+    title: str = "Untitled Notebook"
+
+
+class SwitchNotebookPayload(BaseModel):
+    notebook_id: str
+
+
+class RenameNotebookPayload(BaseModel):
+    title: str
+
+
 # Backward-compatible alias for NotebookService
 DanibookServer = NotebookService
 
@@ -206,6 +218,28 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     @api.post("/api/notebook/new")
     async def new_notebook():
         data = service.reset_notebook()
+        return {"status": "ok", **data}
+
+    @api.get("/api/notebooks")
+    async def list_notebooks():
+        return {
+            "notebooks": service.list_notebooks(),
+            "active_notebook_id": service.notebook_id,
+        }
+
+    @api.post("/api/notebooks/create")
+    async def create_notebook(payload: CreateNotebookPayload):
+        data = await run_in_threadpool(service.create_notebook, payload.title)
+        return {"status": "ok", **data}
+
+    @api.post("/api/notebooks/switch")
+    async def switch_notebook(payload: SwitchNotebookPayload):
+        data = await run_in_threadpool(service.switch_notebook_by_id, payload.notebook_id)
+        return {"status": "ok", **data}
+
+    @api.post("/api/notebooks/rename")
+    async def rename_notebook(payload: RenameNotebookPayload):
+        data = service.rename_notebook(payload.title)
         return {"status": "ok", **data}
 
     @api.post("/api/sources/paste")

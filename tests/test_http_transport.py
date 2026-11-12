@@ -74,3 +74,45 @@ def test_http_paste_and_delete_source_roundtrip(tmp_path: Path):
     assert res_del.status_code == 200
     assert res_del.json()["deleted"] == imported
     assert imported not in res_del.json()["selected"]
+
+
+def test_http_multi_notebook_lifecycle(tmp_path: Path):
+    client, _ = _make_test_client(tmp_path)
+
+    # Initial list contains default
+    res_list = client.get("/api/notebooks")
+    assert res_list.status_code == 200
+    assert res_list.json()["active_notebook_id"] == "default"
+    assert len(res_list.json()["notebooks"]) == 1
+
+    # Create a new isolated Notebook
+    res_create = client.post("/api/notebooks/create", json={"title": "Proyecto Cervantes"})
+    assert res_create.status_code == 200
+    created_id = res_create.json()["notebook_id"]
+    assert created_id != "default"
+    assert res_create.json()["notebook_title"] == "Proyecto Cervantes"
+
+    # Add a Source inside the new Notebook
+    res_paste = client.post("/api/sources/paste", json={"title": "Quijote_Nota", "content": "En un lugar de la Mancha."})
+    assert res_paste.status_code == 200
+    assert len(res_paste.json()["sources"]) == 1
+
+    # Switch back to default -> Sources are isolated
+    res_switch_def = client.post("/api/notebooks/switch", json={"notebook_id": "default"})
+    assert res_switch_def.status_code == 200
+    assert res_switch_def.json()["notebook_id"] == "default"
+    assert res_switch_def.json()["sources"] == []
+
+    # Switch back to created Notebook -> Source is still there
+    res_switch_nb = client.post("/api/notebooks/switch", json={"notebook_id": created_id})
+    assert res_switch_nb.status_code == 200
+    assert len(res_switch_nb.json()["sources"]) == 1
+
+    # Rename active Notebook
+    res_rename = client.post("/api/notebooks/rename", json={"title": "Cervantes II"})
+    assert res_rename.status_code == 200
+    assert res_rename.json()["notebook_title"] == "Cervantes II"
+
+    # Switching to unknown Notebook returns 404
+    res_404 = client.post("/api/notebooks/switch", json={"notebook_id": "does-not-exist"})
+    assert res_404.status_code == 404

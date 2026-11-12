@@ -166,10 +166,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       padding: 8px 18px;
       min-block-size: 56px;
       flex-shrink: 0;
-      gap: 12px;
+      gap: 10px 12px;
       max-inline-size: 100vw;
     }
 
@@ -208,12 +209,20 @@
       padding: 5px 8px;
       border-radius: 8px;
       field-sizing: content;
-      min-inline-size: 110px;
-      max-inline-size: 220px;
+      min-inline-size: 80px;
+      max-inline-size: 160px;
       font-family: inherit;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    #notebook-select {
+      max-inline-size: 140px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px 8px;
     }
 
     .notebook-title:hover,
@@ -2055,6 +2064,7 @@
       </div>
       <span style="font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; color:var(--text-primary);">DaniBookLM</span>
       <span style="color:var(--border-subtle);" aria-hidden="true">/</span>
+      <select id="notebook-select" class="model-select" aria-label="Select Notebook" title="Switch Notebook"></select>
       <input type="text" id="notebook-title-input" class="notebook-title" value="Local Research Notebook" aria-label="Notebook Title" />
       <button type="button" id="btn-new-notebook" class="btn-mini" title="Create a new clean notebook" aria-label="New Notebook">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; color:var(--accent);">add</span>
@@ -2631,6 +2641,7 @@
       tabBtnSamples: document.getElementById("tab-btn-samples"),
       tabPaneCollections: document.getElementById("tab-pane-collections"),
       tabPaneSamples: document.getElementById("tab-pane-samples"),
+      notebookSelect: document.getElementById("notebook-select"),
       notebookTitleInput: document.getElementById("notebook-title-input"),
       btnNewNotebook: document.getElementById("btn-new-notebook"),
       overviewBanner: document.getElementById("overview-banner"),
@@ -3267,9 +3278,41 @@
       });
     }
 
+    function renderNotebooks() {
+      if (!els.notebookSelect) return;
+      els.notebookSelect.innerHTML = "";
+      (state.notebooks || []).forEach(nb => {
+        const opt = document.createElement("option");
+        opt.value = nb.id;
+        opt.textContent = nb.title || nb.id;
+        if (nb.id === state.activeNotebookId) opt.selected = true;
+        els.notebookSelect.appendChild(opt);
+      });
+    }
+
+    function applyNotebookState(data) {
+      state.activeNotebookId = data.notebook_id || "default";
+      state.notebooks = data.notebooks || state.notebooks || [];
+      state.sources = data.sources || [];
+      state.selectedSources = new Set(data.selected || state.sources.map(s => s.name));
+      state.notes = data.notes || [];
+      state.chatHistory = [];
+      if (els.notebookTitleInput && data.notebook_title) {
+        els.notebookTitleInput.value = data.notebook_title;
+      }
+      els.chatStream.innerHTML = initialOverviewHTML;
+      bindSuggestionChips(els.chatStream);
+      renderNotebooks();
+      renderSources();
+      renderNotes();
+      updateContextMeterUI();
+    }
+
     async function loadInitialData() {
       const res = await fetch("/api/state");
       const data = await res.json();
+      state.activeNotebookId = data.notebook_id || "default";
+      state.notebooks = data.notebooks || [];
       state.sources = data.sources || [];
       state.selectedSources = new Set(data.selected || state.sources.map(s => s.name));
       state.notes = data.notes || [];
@@ -3277,6 +3320,10 @@
       state.collections = data.collections || [];
       state.samples = data.samples || [];
       state.activeModelId = data.active_model_id || "";
+      if (els.notebookTitleInput && data.notebook_title) {
+        els.notebookTitleInput.value = data.notebook_title;
+      }
+      renderNotebooks();
       renderModels();
       renderCollections();
       renderSamples();
@@ -4304,29 +4351,52 @@
       showToast(`💾 Note saved: "${title}"`);
     });
 
+    if (els.notebookSelect) {
+      els.notebookSelect.addEventListener("change", async (e) => {
+        const targetId = e.target.value;
+        const res = await fetch("/api/notebooks/switch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notebook_id: targetId })
+        });
+        const data = await res.json();
+        applyNotebookState(data);
+        showToast(`📓 Switched to "${data.notebook_title}"`);
+      });
+    }
+
+    if (els.notebookTitleInput) {
+      els.notebookTitleInput.addEventListener("change", async (e) => {
+        const res = await fetch("/api/notebooks/rename", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: e.target.value })
+        });
+        const data = await res.json();
+        state.notebooks = data.notebooks || state.notebooks;
+        renderNotebooks();
+      });
+    }
+
     if (els.btnNewNotebook) {
       els.btnNewNotebook.addEventListener("click", async () => {
         const ok = await showConfirmModal(
           "Create a new notebook?",
-          "This will start a fresh notebook: active sources, conversation turns, and notes will be cleared for your new research project.",
+          "This will create an isolated notebook while preserving your existing notebooks so you can switch back anytime.",
           "Create new notebook",
           "Cancel"
         );
         if (!ok) return;
 
-        const res = await fetch("/api/notebook/new", { method: "POST" });
+        const nextNum = (state.notebooks ? state.notebooks.length : 1) + 1;
+        const res = await fetch("/api/notebooks/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: `Notebook ${nextNum}` })
+        });
         const data = await res.json();
-        state.sources = data.sources || [];
-        state.notes = data.notes || [];
-        state.selectedSources = new Set();
-        state.chatHistory = [];
-        els.chatStream.innerHTML = initialOverviewHTML;
-        bindSuggestionChips(els.chatStream);
-        els.notebookTitleInput.value = "Untitled Notebook";
-        renderSources();
-        renderNotes();
-        updateContextMeterUI();
-        showToast("✨ Fresh notebook started");
+        applyNotebookState(data);
+        showToast(`✨ Created "${data.notebook_title}"`);
       });
     }
 
