@@ -21,7 +21,7 @@ def _find_free_port() -> int:
 
 
 @pytest.fixture()
-def live_app_url(tmp_path: Path):
+def live_server(tmp_path: Path):
     """Starts a real Uvicorn server with an isolated NotebookService in mock LLM mode."""
     service = NotebookService(
         workspace_dir=tmp_path / "workspace",
@@ -53,13 +53,14 @@ def live_app_url(tmp_path: Path):
         raise RuntimeError("Live test server failed to start in time")
 
     try:
-        yield f"{base_url}/app"
+        yield f"{base_url}/app", service
     finally:
         server.should_exit = True
         thread.join(timeout=5)
 
 
-def test_e2e_sources_chat_studio_notes_and_models(page: Page, live_app_url: str):
+def test_e2e_sources_chat_studio_notes_and_models(page: Page, live_server):
+    live_app_url, _ = live_server
     page.goto(live_app_url, wait_until="domcontentloaded")
 
     # 1. Model selector is populated from /api/state
@@ -108,3 +109,46 @@ def test_e2e_sources_chat_studio_notes_and_models(page: Page, live_app_url: str)
     page.reload(wait_until="domcontentloaded")
     expect(page.locator("#notes-list")).to_contain_text("Nota E2E")
     expect(page.locator("#sources-list")).to_contain_text("E2E_Source.md")
+
+
+def test_e2e_mindmap_flashcards_and_markdown_export(page: Page, live_server, monkeypatch):
+    live_app_url, service = live_server
+
+    def fake_stream_synthesis(message: str, action_type: str = "chat", **_kwargs):
+        if action_type == "mindmap":
+            yield "```mermaid\ngraph TD\n  A[Source] --> B[Concept]\n```\n"
+        elif action_type == "flashcards":
+            yield (
+                "### Card 1\n"
+                "- **Front**: ¿Qué es Desk?\n"
+                "- **Back**: Memoria Tier 1 en el prefijo del prompt.\n"
+                "- **Takeaway**: Mantiene fuentes activas.\n"
+            )
+        else:
+            yield "Respuesta base."
+
+    monkeypatch.setattr(service, "stream_synthesis", fake_stream_synthesis)
+    page.goto(live_app_url, wait_until="domcontentloaded")
+
+    # 1. Visual Mind Map renders Mermaid SVG
+    page.locator('.studio-tile[data-studio="mindmap"]').click()
+    mermaid_svg = page.locator("#chat-stream .mermaid-container svg")
+    expect(mermaid_svg).to_be_visible()
+
+    # 2. Flashcards & Quiz renders interactive card and toggles reveal
+    page.locator('.studio-tile[data-studio="flashcards"]').click()
+    card = page.locator("#chat-stream .flashcard-item").first
+    expect(card).to_be_visible()
+    expect(card).to_contain_text("Click to reveal answer")
+    card.click()
+    expect(card).to_contain_text("Hide answer")
+    expect(card).to_have_class(r"flashcard-item revealed")
+
+    # 3. Notebook Export (Markdown download)
+    page.locator("#btn-export-notebook").click()
+    expect(page.locator("#export-notebook-modal")).to_be_visible()
+    with page.expect_download() as download_info:
+        page.locator("#btn-export-download-md").click()
+    download = download_info.value
+    assert download.suggested_filename.endswith(".md")
+

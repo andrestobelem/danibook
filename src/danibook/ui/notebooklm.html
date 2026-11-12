@@ -3608,7 +3608,8 @@
       const { markdown } = parseResponseAndSuggestions(raw);
       let html = marked.parse(markdown || raw);
       html = DOMPurify.sanitize(html);
-      html = html.replace(/\[([^\]]+)\]/g, (match, inner) => {
+      html = html.replace(/(<pre\b[\s\S]*?<\/pre>|<code\b[\s\S]*?<\/code>)|\[([^\]]+)\]/g, (match, codeBlock, inner) => {
+        if (codeBlock) return codeBlock;
         return `<span class="citation-badge" data-cite="${inner}">📎 ${inner}</span>`;
       });
       return html;

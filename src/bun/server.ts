@@ -2,8 +2,8 @@ import { Database } from "bun:sqlite";
 import { join, resolve, sep } from "path";
 import { existsSync, mkdirSync } from "fs";
 
-const PORT = 7861;
-const PYTHON_BACKEND = "http://127.0.0.1:7860";
+const PORT = Number(process.env.DANIBOOK_BUN_PORT || 7861);
+const PYTHON_BACKEND = process.env.DANIBOOK_PYTHON_URL || "http://127.0.0.1:7860";
 const DATA_DIR = process.env.DANIBOOK_DATA_DIR || join(process.cwd(), "data");
 const CACHE_DIR = join(DATA_DIR, "cache");
 mkdirSync(CACHE_DIR, { recursive: true });
