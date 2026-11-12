@@ -111,6 +111,24 @@ class NotebookService:
         """Returns the list of Source names currently active in the Desk (Tier 1)."""
         return self.desk.get_active_files()
 
+    def search_archive(self, query: str, top_k: int = 10) -> Dict[str, Any]:
+        """Searches the Archive (Tier 2) via SQLite FTS5 BM25 and returns ranked fragments."""
+        if not query or not query.strip():
+            return {"query": query, "count": 0, "results": []}
+        hits = self.archive.search(query, top_k=top_k)
+        results = []
+        for chunk, score in hits:
+            raw = chunk.content.strip()
+            snippet = raw[:220] + ("..." if len(raw) > 220 else "")
+            results.append({
+                "source_file": chunk.source_file,
+                "page_number": chunk.page_number,
+                "section_title": chunk.section_title,
+                "snippet": snippet,
+                "score": round(score, 4),
+            })
+        return {"query": query, "count": len(results), "results": results}
+
     def get_models_state(self) -> Dict[str, Any]:
         """Returns the status of all configured models and the active model state."""
         return {

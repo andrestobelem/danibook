@@ -1558,6 +1558,63 @@
       align-items: center;
     }
 
+    .archive-fts-results {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-block-size: 210px;
+      overflow-y: auto;
+      padding: 6px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .archive-fts-results.visible {
+      display: flex;
+    }
+
+    .archive-fts-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      background: var(--bg-panel);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-align: start;
+      color: var(--text-primary);
+      font-family: inherit;
+    }
+
+    .archive-fts-item:hover {
+      border-color: var(--accent);
+    }
+
+    .archive-fts-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .archive-fts-snippet {
+      font-size: 0.74rem;
+      line-height: 1.35;
+      color: var(--text-muted);
+    }
+
+    .archive-fts-snippet b {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
     .source-search-input {
       inline-size: 100%;
       background: var(--bg-card);
@@ -2117,6 +2174,20 @@
           />
         </div>
 
+        <div class="source-search-wrap">
+          <span class="material-symbols-outlined source-search-icon" aria-hidden="true">manage_search</span>
+          <input
+            type="search"
+            id="archive-fts-input"
+            class="source-search-input"
+            placeholder="Search Archive fragments (FTS5)..."
+            aria-label="Search Archive fragments"
+            autocomplete="off"
+          />
+        </div>
+
+        <div id="archive-fts-results" class="archive-fts-results" aria-live="polite"></div>
+
         <input
           type="file"
           id="file-upload-input"
@@ -2532,6 +2603,8 @@
     const els = {
       sourcesList: document.getElementById("sources-list"),
       sourceFilterInput: document.getElementById("source-filter-input"),
+      archiveFtsInput: document.getElementById("archive-fts-input"),
+      archiveFtsResults: document.getElementById("archive-fts-results"),
       sourcesTotalBadge: document.getElementById("sources-total-badge"),
       activeSourcesPill: document.getElementById("active-sources-pill"),
       toggleAllSources: document.getElementById("toggle-all-sources"),
@@ -3897,6 +3970,73 @@
       els.sourceFilterInput.addEventListener("input", (e) => {
         state.sourceFilterQuery = e.target.value;
         renderSources();
+      });
+    }
+
+    let archiveFtsTimer = null;
+    async function runArchiveFtsSearch(query) {
+      const container = els.archiveFtsResults;
+      if (!container) return;
+      const trimmed = (query || "").trim();
+      if (!trimmed) {
+        container.classList.remove("visible");
+        container.innerHTML = "";
+        return;
+      }
+      try {
+        const res = await fetch(`/api/fts/search?q=${encodeURIComponent(trimmed)}`);
+        const data = await res.json();
+        const items = data.results || [];
+        container.innerHTML = "";
+        container.classList.add("visible");
+
+        if (items.length === 0) {
+          const empty = document.createElement("div");
+          empty.style.cssText = "font-size:0.74rem; color:var(--text-muted); padding:4px 6px;";
+          empty.textContent = "No matching Archive fragments.";
+          container.appendChild(empty);
+          return;
+        }
+
+        items.forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "archive-fts-item";
+          const pageLabel = item.page_number ? ` · Pág. ${item.page_number}` : "";
+          const sectionLabel = item.section_title ? ` · ${item.section_title}` : "";
+
+          const meta = document.createElement("div");
+          meta.className = "archive-fts-meta";
+          const titleSpan = document.createElement("span");
+          titleSpan.textContent = `${item.source_file}${pageLabel}${sectionLabel}`;
+          meta.appendChild(titleSpan);
+
+          const snippetDiv = document.createElement("div");
+          snippetDiv.className = "archive-fts-snippet";
+          snippetDiv.innerHTML = DOMPurify.sanitize(item.snippet || "", { ALLOWED_TAGS: ["b"] });
+
+          btn.appendChild(meta);
+          btn.appendChild(snippetDiv);
+          btn.addEventListener("click", () => inspectSource(item.source_file));
+          container.appendChild(btn);
+        });
+      } catch (err) {
+        console.warn("Archive FTS5 search failed:", err);
+      }
+    }
+
+    if (els.archiveFtsInput) {
+      els.archiveFtsInput.addEventListener("input", (e) => {
+        clearTimeout(archiveFtsTimer);
+        const val = e.target.value;
+        archiveFtsTimer = setTimeout(() => runArchiveFtsSearch(val), 180);
+      });
+      els.archiveFtsInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          clearTimeout(archiveFtsTimer);
+          runArchiveFtsSearch(e.target.value);
+        }
       });
     }
 

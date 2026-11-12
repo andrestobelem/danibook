@@ -177,6 +177,10 @@ def create_fastapi_app(notebook: Optional[NotebookService] = None) -> FastAPI:
     async def get_source_content(name: str = Query(...)):
         return service.get_source_detail(name)
 
+    @api.get("/api/fts/search")
+    async def search_fts(q: str = Query("")):
+        return service.search_archive(q)
+
     @api.post("/api/sources/upload")
     async def upload_sources(files: List[UploadFile] = File(...)):
         uploaded_names = []

@@ -80,6 +80,17 @@ def test_e2e_sources_chat_studio_notes_and_models(page: Page, live_server):
     expect(sources_list).to_contain_text("E2E_Source.md")
     expect(page.locator("#active-sources-pill")).to_contain_text("1")
 
+    # 2b. Archive FTS5 fragment search in Sources panel
+    fts_input = page.locator("#archive-fts-input")
+    fts_input.fill("Contenido")
+    fts_input.press("Enter")
+    fts_results = page.locator("#archive-fts-results")
+    expect(fts_results).to_be_visible()
+    expect(fts_results).to_contain_text("E2E_Source.md")
+    fts_results.locator(".archive-fts-item").first.click()
+    expect(page.locator("#source-modal")).to_be_visible()
+    page.locator("#close-source-modal").click()
+
     # Toggle source checkbox off and back on
     source_checkbox = sources_list.locator('input[type="checkbox"]').first
     source_checkbox.uncheck()
